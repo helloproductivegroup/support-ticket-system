@@ -182,7 +182,7 @@
 
         if (res.ok && data.success) {
           status.className = 'status success';
-          status.textContent = `Thanks — your ticket has been logged (ID: ${data.ticketId}). Category: ${data.category}, Priority: ${data.priority}, Assigned to: ${data.assignedAgent}. ${data.message}`;
+          status.textContent = "Thanks for reaching out — we've received your request and a member of our support team will be in touch soon.";
           form.reset();
           charCount.textContent = '0';
         } else {
