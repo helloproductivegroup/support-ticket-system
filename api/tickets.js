@@ -163,14 +163,34 @@ Respond with exactly this JSON structure:
 
     const airtableData = await airtableResponse.json();
 
-    // --- STEP D: Return success to the form ---
+    // --- STEP D: Email the AI-drafted response to the customer ---
+    try {
+      const emailResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM_EMAIL,
+          to: email,
+          subject: `Re: ${subject}`,
+          text: `Hi ${name},\n\n${aiResult.ai_response}\n\nThanks,\nSupport Team`
+        })
+      });
+
+      if (!emailResponse.ok) {
+        const errorBody = await emailResponse.text();
+        console.error(`Resend error: ${emailResponse.status} - ${errorBody}`);
+      }
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError.message);
+    }
+
+    // --- STEP E: Return success to the form ---
     return res.status(200).json({
       success: true,
-      ticketId: airtableData.records[0].id,
-      category: aiResult.category,
-      priority: aiResult.priority,
-      assignedAgent: assignedAgent.name,
-      message: aiResult.ai_response
+      ticketId: airtableData.records[0].id
     });
 
   } catch (error) {
