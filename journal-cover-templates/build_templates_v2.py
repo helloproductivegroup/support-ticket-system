@@ -41,6 +41,11 @@ OUT = os.path.dirname(os.path.abspath(__file__))
 BLEED = 6.0       # template drawn this far beyond the piece edge on outer tiles
 BAND = 10.0       # overlap either side of each split between tiles
 CAPTION_W = 95.0  # width the longest hole caption needs
+W_LS, H_LS = 279.4, 215.9   # US Letter LANDSCAPE
+LS_EDGE = 5.5     # paper we insist on either side of a one-sheet landscape piece
+LS_TOP = 32.0     # top of the piece on that page
+LS_FOOT = 50.0    # reserved below it for the dimension chains and the note
+                  # (the layout actually consumes 51.9 mm below a 132 mm piece)
 K = 0.5522847498307936          # circle/arc Bezier constant
 PT = 72.0 / 25.4                # mm -> PostScript points
 MM_PER_IN = 25.4
@@ -161,6 +166,12 @@ class Cover:
         return lo, hi
 
     @property
+    def letter_single(self):
+        "Does the whole piece fit one Letter sheet in landscape, at full size?"
+        return (self.total_w <= W_LS - 2 * LS_EDGE
+                and self.panel_h <= H_LS - LS_TOP - LS_FOOT)
+
+    @property
     def callout_side(self):
         """Which side of the spine the hole captions go on.
 
@@ -253,10 +264,16 @@ A6 = Cover(
 # the new hardware: 2.5 mm eyelets for the elastics, 3 mm for the closure.
 # Three columns of 5.5 mm flanges still need a 24 mm spine, which is wide for
 # a 9 mm stack - see the tuning notes.
+#
+# The flap is 58 rather than V1's 62 so the flat piece comes to 268 mm, the
+# same overall width V1 had before the spine grew. That is what lets the whole
+# template sit on ONE US Letter sheet in landscape, with the same 5.7 mm
+# margins the original printed at. 58/93 also puts its flap-to-panel ratio in
+# line with the other three covers, which 62 did not.
 PASSPORT = Cover(
     name='Passport', slug='passport',
     fits="3 Traveler's Passport inserts at 89 x 124 mm",
-    panel_w=93.0, panel_h=132.0, spine_w=SPINE_W, flap_w=62.0,
+    panel_w=93.0, panel_h=132.0, spine_w=SPINE_W, flap_w=58.0,
     corner_r=4.0,
     hole_d=HOLE_D, closure_d=CLOSURE_D, flange_d=FLANGE_D,
     col_gap=COL_GAP, row_gap=ROW_GAP, y_inset=10.0,
@@ -486,6 +503,21 @@ def p_clip(x, y, w, h):
     return f"{_n(x)} {_n(y)} {_n(w)} {_n(h)} re W n\n"
 
 
+def wrap(text, size, max_w):
+    """Greedy wrap using the same advance estimate p_text centres with."""
+    lines, cur = [], ''
+    for word in text.split():
+        trial = f'{cur} {word}'.strip()
+        if cur and _adv(trial, size) > max_w:
+            lines.append(cur)
+            cur = word
+        else:
+            cur = trial
+    if cur:
+        lines.append(cur)
+    return lines
+
+
 def p_para(x, y, lines, size=3.0, gray=0.2, leading=4.2):
     s = []
     for i, ln in enumerate(lines):
@@ -597,98 +629,137 @@ def page_frame(c, n, total, subtitle, W=W_LETTER):
     return ''.join(s)
 
 
-def instruction_page(c, n, total, single, W=W_LETTER):
-    s = [page_frame(c, n, total,
-                    'READ THIS FIRST  -  printing, transferring, punching, setting',
-                    W)]
-    y = 32
+def instruction_sections(c, n, kind):
+    """(heading, [paragraph, ...]) for every instruction page, unwrapped.
 
-    def head(t):
-        nonlocal y
-        s.append(p_text(MARGIN, y, t, 4.0, 0.1, bold=True))
-        s.append(p_line(MARGIN, y + 1.8, W - MARGIN, y + 1.8, lw=0.3, gray=0.6))
-        y += 7
-
-    def body(lines):
-        nonlocal y
-        s.append(p_para(MARGIN + 2, y, lines, 3.0, 0.2, 4.3))
-        y += len(lines) * 4.3 + 5
-
-    head('1  PRINT AT 100%')
-    body([
-        'Print every page at 100% / Actual Size. Turn OFF "fit to page", "shrink to fit" and',
-        '"scale to paper size" - they are on by default in most print dialogs and they are the',
+    kind is 'tiles', 'legal' or 'letter-single'. One body of copy, wrapped to
+    whatever column width the page it lands on can take.
+    """
+    tw, ph = c.total_w, c.panel_h
+    secs = [('1  PRINT AT 100%', [
+        'Print every page at 100% / Actual Size. Turn OFF "fit to page", "shrink to fit" and '
+        '"scale to paper size" - they are on by default in most print dialogs and they are the '
         'single most common way a template comes out the wrong size.',
         f'Then go to page {n + 1} and measure the scale bars before you cut anything.',
-    ])
+    ])]
 
-    if single:
-        head('2  ONE SHEET, NO TAPE')
-        body([
-            f'The whole {c.total_w:g} x {c.panel_h:g} mm template is on page {n + 2}, turned 90 '
-            'degrees to fit',
+    if kind == 'tiles':
+        secs.append((f'2  ASSEMBLE THE {c.tiles} TILES', [
+            f'The full-size template is split across {c.tiles} pages ({n + 2} to '
+            f'{n + 1 + c.tiles}), side by side, left to right. Every seam is vertical, so there '
+            'is one line of tape per joint.',
+            'Trim the first tile along its right-hand TRIM LINE, lay it over the next page so the '
+            '+ registration marks sit exactly on top of each other, and tape the overlap. Each '
+            'seam has two + marks, one near the head and one near the tail: get both onto their '
+            'partners or the joint can pivot.',
+            f'Work left to right, then check the assembled length against the flat-piece '
+            f'dimension printed on the template ({tw:g} mm).',
+        ]))
+    elif kind == 'legal':
+        secs.append(('2  ONE SHEET, NO TAPE', [
+            f'The whole {tw:g} x {ph:g} mm template is on page {n + 2}, turned 90 degrees to fit '
             'a single US Legal sheet. Turn the paper sideways to read it.',
-            'Check the length across the assembled piece against the flat-piece dimension',
-            f'printed along its head edge ({c.total_w:g} mm) before you trust it.',
-        ])
+            'Check the length across the piece against the flat-piece dimension printed along '
+            f'its head edge ({tw:g} mm) before you trust it.',
+        ]))
     else:
-        head('2  ASSEMBLE THE TILES')
-        body([
-            f'The full-size template is split across {c.tiles} pages ({n + 2} to {total}), '
-            f'side by side, left to right.',
-            'Every seam is vertical, so there is only one line of tape per joint.',
-            'Trim the first tile along its right-hand TRIM LINE, lay it over the next page so',
-            'the + registration marks sit exactly on top of each other, and tape the overlap.',
-            'Each seam has two + marks, one near the head and one near the tail: get both onto',
-            'their partners or the joint can pivot. Work left to right, then check the assembled',
-            f'length against the flat-piece dimension printed on the template ({c.total_w:g} mm).',
-        ])
+        margin = (W_LS - tw) / 2.0
+        secs.append(('2  ONE SHEET, AND IT IS TIGHT', [
+            f'The whole {tw:g} x {ph:g} mm template is on page {n + 2}, printed landscape. It '
+            f'runs close to the edges of the sheet - there is only {margin:.1f} mm of paper '
+            'either side of it. That is the only way a piece this wide fits one Letter sheet at '
+            'full size, and some printers cannot put ink that close to the edge.',
+            'So the page carries its own check. Under the template is a dimension line with a '
+            f'tick at each extreme edge of the piece. Measure between those two ticks: {tw:g} mm '
+            'exactly means nothing was clipped and nothing was scaled.',
+            'If a tick is missing, your printer trimmed the page. Use the tiled Letter edition or '
+            'the Legal edition instead - both are full size and neither is near an edge.',
+            'You can also rescue a clipped print. The fold lines sit well inside the margins, so '
+            f'measure {c.panel_w:g} mm out from the first fold to find the left edge and '
+            f'{c.flap_w:g} mm out from the third to find the right.',
+        ]))
 
-    head('3  TRANSFER TO LEATHER')
-    body([
-        f'You need a piece at least {c.total_w + 12:g} x {c.panel_h + 12:g} mm '
-        f'({(c.total_w + 12) / MM_PER_IN:.1f} x {(c.panel_h + 12) / MM_PER_IN:.1f} in) '
-        'to have something to hold on to.',
-        'Cut the paper template out and lay it OUTSIDE FACE UP on the grain side of the leather.',
-        'The outline is a symmetric rounded rectangle, so it traces the same either way up - but',
-        'the flap must end up on the BACK cover, so keep track of which panel is which.',
-        'Mark the corners and the four fold lines lightly with a scratch awl, and prick all',
-        f'{len(c.holes())} hole centres through the paper.',
-    ])
+    secs += [
+        ('3  TRANSFER TO LEATHER', [
+            f'You need a piece at least {tw + 12:g} x {ph + 12:g} mm '
+            f'({(tw + 12) / MM_PER_IN:.1f} x {(ph + 12) / MM_PER_IN:.1f} in) to have something '
+            'to hold on to.',
+            'Cut the paper template out and lay it OUTSIDE FACE UP on the grain side of the '
+            'leather. The outline is a symmetric rounded rectangle, so it traces the same either '
+            'way up - but the flap must end up on the BACK cover, so keep track of which panel '
+            'is which.',
+            'Mark the corners and the four fold lines lightly with a scratch awl, and prick all '
+            f'{len(c.holes())} hole centres through the paper.',
+        ]),
+        ('4  PUNCH THE HOLES - BEFORE YOU CREASE', [
+            f'{c.hole_d:g} mm round punch for the {c.n_elastic} elastic holes, '
+            f'{c.closure_d:g} mm for the single closure hole. A folded panel will not sit flat '
+            'under a punch, so all punching happens while the piece is still flat. Punch into '
+            'end grain or a poly board.',
+            'The dotted ring around each hole is the eyelet FLANGE footprint, drawn at '
+            f'{c.flange_d:g} mm. Set one eyelet in a scrap first and measure its flange: if '
+            f'yours is wider than {c.flange_d:g} mm, neighbouring flanges will touch and you '
+            'should open the spacing in the build script before cutting the real piece.',
+        ]),
+        ('5  SET THE EYELETS', [
+            f'{c.n_elastic} eyelets at {c.hole_d:g} mm for the elastics, 1 at '
+            f'{c.closure_d:g} mm for the closure. Set from the OUTSIDE so the finished flange '
+            'shows on the outside of the spine and the rolled side sits inside where the inserts '
+            'run.',
+            'Work from the middle of each cluster outward, and check the piece stays flat - a '
+            f'spine with {c.n_elastic} eyelets in it will bow if you over-set them.',
+        ]),
+        ('6  CREASE, THEN ASSEMBLE', [
+            'Dampen the grain slightly and run a bone folder along a straight edge on each of the '
+            'three solid fold lines. Fold away from the grain side.',
+            'Closure elastic first, then the three insert elastics. '
+            + ('Each one goes out through the INNER hole of a cluster, across the '
+               f'{c.row_gap:g} mm bar, back in through the OUTER hole, stopper knot inside.'
+               if c.n_rows > 1 else
+               'Each one goes out through its hole and is stopped with a knot against the '
+               'eyelet on the outside.'),
+        ]),
+    ]
+    return secs
 
-    head('4  PUNCH THE HOLES  -  BEFORE YOU CREASE THE FOLDS')
-    body([
-        f'{c.hole_d:g} mm round punch for the {c.n_elastic} elastic holes, '
-        f'{c.closure_d:g} mm for the single closure hole.',
-        'A folded panel will not sit flat under a punch, so all punching happens while the piece',
-        'is still flat. Punch into end grain or a poly board.',
-        'The dotted ring around each hole on the template is the eyelet FLANGE footprint, drawn',
-        f'at {c.flange_d:g} mm. Set one eyelet in a scrap first and measure its flange: if yours is',
-        f'wider than {c.flange_d:g} mm, neighbouring flanges will touch and you should open the',
-        'column and row spacing in the build script before cutting the real piece.',
-    ])
 
-    head('5  SET THE EYELETS')
-    body([
-        f'{c.n_elastic} eyelets at {c.hole_d:g} mm for the elastics, '
-        f'1 at {c.closure_d:g} mm for the closure.',
-        'Set from the OUTSIDE so the finished flange shows on the outside of the spine and the',
-        'rolled side sits inside where the inserts run.',
-        'Work from the middle of each cluster outward, and check the piece stays flat - a spine',
-        f'with {c.n_elastic} eyelets in it will bow if you over-set them.',
-    ])
+def instruction_page(c, n, total, kind, W=W_LETTER, columns=1):
+    """One or two columns of the same copy, wrapped to fit the column."""
+    s = [page_frame(c, n, total,
+                    'READ THIS FIRST  -  printing, transferring, punching, setting', W)]
+    gutter = 12.0
+    col_w = (W - 2 * MARGIN - gutter * (columns - 1)) / columns
+    text_w = col_w - 2.0
+    if columns == 1:
+        text_w = min(text_w, 150.0)
 
-    head('6  CREASE, THEN ASSEMBLE')
-    body([
-        'Dampen the grain slightly and run a bone folder along a straight edge on each of the',
-        'three solid fold lines. Fold away from the grain side.',
-        'Closure elastic first, then the three insert elastics.',
-        ('Each one goes out through the INNER hole of a cluster, across the '
-         f'{c.row_gap:g} mm bar, back in through the OUTER hole, stopper knot inside.'
-         if c.n_rows > 1 else
-         'Each one goes out through its hole and is stopped with a knot on the inside.'),
-    ])
+    # lay every section out as a block, then flow the blocks into the columns
+    blocks = []
+    for head, paras in instruction_sections(c, n, kind):
+        wrapped = [wrap(t, 3.0, text_w) for t in paras]
+        height = 7.0 + sum(len(ls) * 4.3 + 2.4 for ls in wrapped) + 3.0
+        blocks.append((head, wrapped, height))
 
+    total_h = sum(b[2] for b in blocks)
+    target = total_h / columns
+    cols, cur, run = [], [], 0.0
+    for b in blocks:
+        if cols.__len__() < columns - 1 and run and run + b[2] / 2 > target:
+            cols.append(cur); cur, run = [], 0.0
+        cur.append(b); run += b[2]
+    cols.append(cur)
+
+    for ci, block in enumerate(cols):
+        x = MARGIN + ci * (col_w + gutter)
+        y = 32.0
+        for head, wrapped, _h in block:
+            s.append(p_text(x, y, head, 4.0, 0.1, bold=True))
+            s.append(p_line(x, y + 1.8, x + col_w - 2, y + 1.8, lw=0.3, gray=0.6))
+            y += 7.0
+            for lines in wrapped:
+                s.append(p_para(x + 2, y, lines, 3.0, 0.2, 4.3))
+                y += len(lines) * 4.3 + 2.4
+            y += 3.0
     return ''.join(s)
 
 
@@ -872,21 +943,75 @@ def legal_page(c, n, total):
     return body
 
 
+def letter_single_page(c, n, total):
+    """The whole piece on one Letter sheet, landscape, at full size.
+
+    The piece is wider than the sheet's safe printable area on some machines,
+    so the page proves itself: a dimension line under the template carries a
+    tick at each extreme edge of the piece. If both ticks printed and they
+    measure the flat-piece width apart, nothing was clipped and nothing was
+    scaled. The panel chain above it rebuilds the outline from the fold lines
+    if they did not.
+    """
+    W, H = W_LS, H_LS
+    ox = (W - c.total_w) / 2.0
+    oy = LS_TOP
+    s = [artwork(c, ox, oy)]
+    bottom = oy + c.panel_h
+
+    def X(v):
+        return v + ox
+
+    # panel chain: the recovery dimensions, measured off the fold lines
+    cy = bottom + 10.0
+    s.append(p_line(X(0), cy, X(c.total_w), cy, lw=0.3, gray=0.45))
+    for x in (0, c.fold_spine_1, c.fold_spine_2, c.fold_flap, c.total_w):
+        s.append(p_line(X(x), cy - 3, X(x), cy + 3, lw=0.3, gray=0.45))
+    for x, val in ((c.panel_w / 2.0, c.panel_w), (c.spine_center, c.spine_w),
+                   (c.fold_spine_2 + c.panel_w / 2.0, c.panel_w),
+                   (c.fold_flap + c.flap_w / 2.0, c.flap_w)):
+        s.append(p_text(X(x), cy + 8, f'{val:g}', 3.0, 0.35, 'center'))
+    s.append(p_text(X(c.total_w / 2.0), cy + 13, 'panel widths in mm, measured from the left edge', 2.7, 0.5, 'center'))
+
+    # the edge check
+    ey = bottom + 28.0
+    s.append(p_line(X(0), ey, X(c.total_w), ey, lw=0.5))
+    for x in (0, c.total_w):
+        s.append(p_line(X(x), ey - 5, X(x), ey + 5, lw=0.7))
+    s.append(p_text(X(c.total_w / 2.0), ey + 10,
+                    f'MEASURE BETWEEN THE TWO END TICKS: {c.total_w:g} mm EXACTLY',
+                    3.6, 0.1, 'center', bold=True))
+    s.append(p_text(X(c.total_w / 2.0), ey + 15,
+                    'Both ticks present and this measurement right = nothing clipped, '
+                    'nothing scaled. A missing tick means your printer trimmed the sheet - '
+                    'use the tiled Letter or the Legal edition.', 2.8, 0.4, 'center'))
+
+    body = ''.join(s)
+    body += page_frame(c, n, total,
+                       f'FULL-SIZE TEMPLATE  -  one Letter sheet, landscape  -  '
+                       f'{(W - c.total_w) / 2:.1f} mm of paper either side', W)
+    return body
+
+
 def build_pdf(c, mode):
     """mode 'letter' -> tiled Letter portrait; 'legal' -> one rotated Legal sheet."""
-    single = (mode == 'legal')
-    total = 3 if single else 2 + c.tiles
-    # Every page in a given PDF is the same size, so the whole file prints from
-    # one paper tray without touching the dialog between pages.
-    W, H = (W_LEGAL, H_LEGAL) if single else (W_LETTER, H_LETTER)
+    kind = {'letter': 'tiles', 'legal': 'legal', 'letter-single': 'letter-single'}[mode]
+    total = 2 + (c.tiles if kind == 'tiles' else 1)
+    # Every page in a given PDF shares one size AND one orientation, so the
+    # whole file prints from one tray without touching the dialog between pages.
+    W, H = {'tiles': (W_LETTER, H_LETTER), 'legal': (W_LEGAL, H_LEGAL),
+            'letter-single': (W_LS, H_LS)}[kind]
+    columns = 2 if kind == 'letter-single' else 1
     pdf = Pdf()
-    pdf.page(W, H, instruction_page(c, 1, total, single, W))
+    pdf.page(W, H, instruction_page(c, 1, total, kind, W, columns))
     pdf.page(W, H, scale_page(c, 2, total, W))
-    if single:
-        pdf.page(W, H, legal_page(c, 3, total))
-    else:
+    if kind == 'tiles':
         for body in tile_pages(c, 3, total):
             pdf.page(W, H, body)
+    elif kind == 'legal':
+        pdf.page(W, H, legal_page(c, 3, total))
+    else:
+        pdf.page(W, H, letter_single_page(c, 3, total))
     fname = f'{c.slug}-cover-v2-{mode}.pdf'
     path = os.path.join(OUT, fname)
     with open(path, 'wb') as fh:
@@ -928,6 +1053,12 @@ def check(c):
         if room < CAPTION_W:
             problems.append(f'{c.name}: only {room:g} mm for the hole captions on tile '
                             f'{i + 1}, need {CAPTION_W:g}')
+    if c.letter_single:
+        edge = (W_LS - c.total_w) / 2.0
+        if edge < LS_EDGE:
+            problems.append(f'{c.name}: only {edge:g} mm of paper either side in landscape')
+        if c.panel_h + LS_TOP + LS_FOOT > H_LS:
+            problems.append(f'{c.name}: piece is too tall for the one-sheet landscape page')
     if c.legal_single:
         if c.panel_h > W_LEGAL - 2 * MARGIN:
             problems.append(f'{c.name}: piece height {c.panel_h:g} mm is too wide for Legal')
@@ -949,6 +1080,8 @@ def main():
 
     for cover in COVERS:
         files.append(build_pdf(cover, 'letter'))
+        if cover.letter_single:
+            files.append(build_pdf(cover, 'letter-single'))
         if cover.legal_single:
             files.append(build_pdf(cover, 'legal'))
 
@@ -968,6 +1101,7 @@ def main():
         print(f"  clearance  flange-to-flange {c.flange_gap:g} | "
               f"flange-to-fold {c.flange_to_fold:g} | flange-to-edge {c.flange_to_edge:g}")
         print(f"  paper    {c.tiles} Letter tile(s)"
+              + ("  +  1 Letter sheet, landscape" if c.letter_single else "")
               + ("  +  1 Legal sheet, rotated" if c.legal_single else ""))
         rows = ' / '.join(f'{y:g}' for y in c.rows_top + c.rows_bottom)
         cols = ' / '.join(f'{x:g}' for x in c.elastic_columns)

@@ -9,11 +9,13 @@ stack, closure anchored on the spine.
 | **A5** | 438 × 212 mm | 3 inserts at 6 × 8 in | 2 rows of 3 per end | 3 Letter tiles |
 | **Regular** | 325 × 216 mm | 3 Traveler's Regular inserts, 110 × 210 mm | 2 rows of 3 | 2 Letter tiles |
 | **A6** | 312 × 157 mm | 3 inserts at A6, 105 × 148 mm | 2 rows of 3 | 2 Letter tiles, **or 1 Legal sheet** |
-| **Passport** | 272 × 132 mm | 3 Traveler's Passport inserts, 89 × 124 mm | **1 row of 3** | 2 Letter tiles, **or 1 Legal sheet** |
+| **Passport** | 268 × 132 mm | 3 Traveler's Passport inserts, 89 × 124 mm | **1 row of 3** | **1 Letter sheet, landscape**, or 2 tiles, or 1 Legal sheet |
 
 The Regular panel is 4.5 × 8.5 in — copied from the WANDERINGS Regular cover,
 rounded to the nearest half millimetre. The Passport keeps V1's panel and its
-single row, on the new 2.5 mm hardware.
+single row, on the new 2.5 mm hardware; its flap is 58 mm rather than V1's 62
+so the flat piece comes back to 268 mm, which is what lets the whole template
+sit on one Letter sheet in landscape.
 
 ## What changed from V1
 
@@ -37,21 +39,29 @@ Eight SVGs — for each cover, `<slug>-cover-v2.svg` (outside face up) and
 `<slug>-cover-v2-mirrored.svg` (for cutting leather grain side down, which is
 what Cricut recommends and therefore usually the one you want).
 
-Six PDFs:
+Seven PDFs:
 
 | File | Pages |
 |---|---|
 | `a5-cover-v2-letter.pdf` | instructions, scale check, 3 tiles |
 | `regular-cover-v2-letter.pdf` | instructions, scale check, 2 tiles |
 | `a6-cover-v2-letter.pdf` | instructions, scale check, 2 tiles |
+| `passport-cover-v2-letter-single.pdf` | instructions, scale check, **whole template on one landscape sheet** |
 | `passport-cover-v2-letter.pdf` | instructions, scale check, 2 tiles |
 | `a6-cover-v2-legal.pdf` | instructions, scale check, **whole template on one sheet** |
 | `passport-cover-v2-legal.pdf` | instructions, scale check, **whole template on one sheet** |
 
 `guide-v2.pdf` and `guide-v2.html` are the build guide.
 
-Every page within a PDF is the same paper size, so each file prints from one
-tray without touching the dialog between pages.
+Every page within a PDF shares one paper size *and* one orientation, so each
+file prints from a single tray without touching the dialog between pages.
+
+The one-sheet landscape edition leaves only 5.7 mm of paper either side of the
+piece, so its template page carries a dimension line with a tick at each
+extreme edge: both ticks present and 268 mm apart means nothing was clipped and
+nothing was scaled. `letter_single` on a `Cover` is computed from `LS_EDGE`,
+`LS_TOP` and `LS_FOOT`, so a cover only gets that edition if it genuinely
+fits.
 
 Both SVGs per cover carry a `CUT` layer (outline + 13 holes) and a `FOLD` layer
 (score lines). **Set `FOLD` to Pen/Draw or delete it** — left as Cut it slices

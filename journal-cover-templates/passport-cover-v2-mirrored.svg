@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Passport trifold traveler's cover V2 (MIRRORED)
-     Piece: 272 x 132 mm. Verify this size after importing.
+     Piece: 268 x 132 mm. Verify this size after importing.
      Layer "CUT"  = outline + 7 holes (6 elastic @ 2.5 mm, 1 closure @ 3 mm).
      Layer "FOLD" = score lines: set FOLD to Pen/Draw or delete it.
      Do NOT leave FOLD set to Cut - it will slice the cover into strips. -->
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-     width="272mm" height="132mm" viewBox="0 0 272 132">
+     width="268mm" height="132mm" viewBox="0 0 268 132">
 <g id="CUT">
   <path fill="#000000" fill-rule="evenodd" stroke="none"
-        d="M 4,0 H 268 A 4,4 0 0 1 272,4 V 128 A 4,4 0 0 1 268,132 H 4 A 4,4 0 0 1 0,128 V 4 A 4,4 0 0 1 4,0 Z M 172.75,10 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 165.75,10 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 158.75,10 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 165.5,66 a 1.5,1.5 0 1 0 3,0 a 1.5,1.5 0 1 0 -3,0 Z M 172.75,122 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 165.75,122 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 158.75,122 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z"/>
+        d="M 4,0 H 264 A 4,4 0 0 1 268,4 V 128 A 4,4 0 0 1 264,132 H 4 A 4,4 0 0 1 0,128 V 4 A 4,4 0 0 1 4,0 Z M 168.75,10 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 161.75,10 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 154.75,10 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 161.5,66 a 1.5,1.5 0 1 0 3,0 a 1.5,1.5 0 1 0 -3,0 Z M 168.75,122 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 161.75,122 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 154.75,122 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z"/>
 </g>
 <g id="FOLD" fill="none" stroke="#e2001a" stroke-width="0.25">
-  <line x1="179" y1="0" x2="179" y2="132"/>
-  <line x1="155" y1="0" x2="155" y2="132"/>
-  <line x1="62" y1="0" x2="62" y2="132"/>
-  <line x1="52" y1="0" x2="52" y2="132" stroke-dasharray="4 3"/>
+  <line x1="175" y1="0" x2="175" y2="132"/>
+  <line x1="151" y1="0" x2="151" y2="132"/>
+  <line x1="58" y1="0" x2="58" y2="132"/>
+  <line x1="48" y1="0" x2="48" y2="132" stroke-dasharray="4 3"/>
 </g>
 </svg>
