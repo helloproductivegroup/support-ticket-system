@@ -52,7 +52,7 @@ class Cover:
     def __init__(self, name, slug, fits, panel_w, panel_h, spine_w, flap_w,
                  corner_r, hole_d, closure_d, flange_d, col_gap, row_gap,
                  y_inset, stack_mm, insert_w, insert_h, insert_label, tiles,
-                 legal_single=False):
+                 n_rows=2, legal_single=False):
         self.name = name
         self.slug = slug              # filename stem
         self.fits = fits              # one-line description of the book it makes
@@ -65,7 +65,8 @@ class Cover:
         self.closure_d = closure_d    # single closure hole
         self.flange_d = flange_d      # eyelet flange OD - drives all spacing
         self.col_gap = col_gap        # horizontal spacing of elastic columns
-        self.row_gap = row_gap        # vertical spacing of the two rows
+        self.row_gap = row_gap        # vertical spacing of the rows, if 2
+        self.n_rows = n_rows          # rows of 3 at EACH end of the spine
         self.y_inset = y_inset        # outer row: distance from top/bottom edge
         self.stack_mm = stack_mm      # thickness of 3 inserts (flap rise)
         self.insert_w = insert_w
@@ -107,13 +108,31 @@ class Cover:
 
     @property
     def rows_top(self):
-        "Outer row first (nearer the edge), then inner row."
-        return [self.y_inset, self.y_inset + self.row_gap]
+        "Outer row first (nearer the edge), then the inner row if there is one."
+        return [self.y_inset + i * self.row_gap for i in range(self.n_rows)]
 
     @property
     def rows_bottom(self):
         h = self.panel_h
-        return [h - self.y_inset - self.row_gap, h - self.y_inset]
+        return [h - y for y in reversed(self.rows_top)]
+
+    @property
+    def inner_row(self):
+        "y of the row closest to the middle of the cover."
+        return self.rows_top[-1]
+
+    @property
+    def n_elastic(self):
+        return 6 * self.n_rows
+
+    @property
+    def row_label(self):
+        return 'DOUBLE ROW' if self.n_rows == 2 else 'SINGLE ROW'
+
+    @property
+    def row_desc(self):
+        return (f'3 holes x {self.n_rows} rows' if self.n_rows == 2
+                else 'one row of 3')
 
     def holes(self):
         """[(cx, cy, diameter, kind), ...] in punching order, top to bottom."""
@@ -161,7 +180,8 @@ class Cover:
     @property
     def flange_gap(self):
         "Bare leather between two neighbouring flanges."
-        return min(self.col_gap, self.row_gap) - self.flange_d
+        gaps = [self.col_gap] + ([self.row_gap] if self.n_rows > 1 else [])
+        return min(gaps) - self.flange_d
 
     @property
     def flange_to_fold(self):
@@ -229,7 +249,23 @@ A6 = Cover(
     tiles=2, legal_single=True,
 )
 
-COVERS = (A5, REGULAR, A6)
+# Passport keeps V1's panel and its SINGLE row of three at each end, but on
+# the new hardware: 2.5 mm eyelets for the elastics, 3 mm for the closure.
+# Three columns of 5.5 mm flanges still need a 24 mm spine, which is wide for
+# a 9 mm stack - see the tuning notes.
+PASSPORT = Cover(
+    name='Passport', slug='passport',
+    fits="3 Traveler's Passport inserts at 89 x 124 mm",
+    panel_w=93.0, panel_h=132.0, spine_w=SPINE_W, flap_w=62.0,
+    corner_r=4.0,
+    hole_d=HOLE_D, closure_d=CLOSURE_D, flange_d=FLANGE_D,
+    col_gap=COL_GAP, row_gap=ROW_GAP, y_inset=10.0,
+    stack_mm=9.0,
+    insert_w=89.0, insert_h=124.0, insert_label="Traveler's Passport",
+    tiles=2, n_rows=1, legal_single=True,
+)
+
+COVERS = (A5, REGULAR, A6, PASSPORT)
 
 
 # ------------------------------------------------------------- geometry ----
@@ -254,7 +290,7 @@ SVG_HEAD = (
     '<?xml version="1.0" encoding="UTF-8"?>\n'
     '<!-- {title}\n'
     '     Piece: {w:g} x {h:g} mm. Verify this size after importing.\n'
-    '     Layer "CUT"  = outline + 13 holes (12 elastic @ {hd:g} mm, 1 closure @ {cd:g} mm).\n'
+    '     Layer "CUT"  = outline + {nh} holes ({ne} elastic @ {hd:g} mm, 1 closure @ {cd:g} mm).\n'
     '     Layer "FOLD" = score lines: set FOLD to Pen/Draw or delete it.\n'
     '     Do NOT leave FOLD set to Cut - it will slice the cover into strips. -->\n'
     '<svg xmlns="http://www.w3.org/2000/svg" version="1.1"\n'
@@ -265,7 +301,8 @@ SVG_HEAD = (
 def svg(cover, mirrored=False):
     w, h = cover.total_w, cover.panel_h
     title = f"{cover.name} trifold traveler's cover V2" + (" (MIRRORED)" if mirrored else "")
-    parts = [SVG_HEAD.format(title=title, w=w, h=h,
+    parts = [SVG_HEAD.format(title=title, w=w, h=h, nh=len(cover.holes()),
+                             ne=cover.n_elastic,
                              hd=cover.hole_d, cd=cover.closure_d)]
 
     # Mirror by baking x' = W - x into the coordinates rather than using a
@@ -514,12 +551,12 @@ def artwork(c, ox, oy):
     def cap(dy, text, size=2.7, gray=0.4, bold=False):
         s.append(p_text(X(cx0), Y(dy), text, size, gray, al, bold=bold))
 
-    cap(c.y_inset, 'DOUBLE ROW - 3 holes x 2 rows, this end and the other',
+    cap(c.y_inset, f'{c.row_label} - {c.row_desc}, this end and the other',
         3.0, 0.15, bold=True)
     cap(c.y_inset + 5,
-        f'12 elastic holes total, {c.hole_d:g} mm dia for {c.hole_d:g} mm eyelets')
-    cap(c.y_inset + 9,
-        f'columns on {c.col_gap:g} mm centres, rows on {c.row_gap:g} mm centres')
+        f'{c.n_elastic} elastic holes total, {c.hole_d:g} mm dia for {c.hole_d:g} mm eyelets')
+    cap(c.y_inset + 9, f'columns on {c.col_gap:g} mm centres'
+        + (f', rows on {c.row_gap:g} mm centres' if c.n_rows > 1 else ''))
     cap(c.y_inset + 13, f'dotted ring = {c.flange_d:g} mm eyelet flange footprint')
     cap(c.y_inset + 17, f'({c.flange_gap:g} mm of leather between flanges)')
 
@@ -615,14 +652,14 @@ def instruction_page(c, n, total, single, W=W_LETTER):
         'Cut the paper template out and lay it OUTSIDE FACE UP on the grain side of the leather.',
         'The outline is a symmetric rounded rectangle, so it traces the same either way up - but',
         'the flap must end up on the BACK cover, so keep track of which panel is which.',
-        'Mark the corners and the four fold lines lightly with a scratch awl, and prick all 13',
-        'hole centres through the paper.',
+        'Mark the corners and the four fold lines lightly with a scratch awl, and prick all',
+        f'{len(c.holes())} hole centres through the paper.',
     ])
 
     head('4  PUNCH THE HOLES  -  BEFORE YOU CREASE THE FOLDS')
     body([
-        f'{c.hole_d:g} mm round punch for the 12 elastic holes, {c.closure_d:g} mm for the '
-        'single closure hole.',
+        f'{c.hole_d:g} mm round punch for the {c.n_elastic} elastic holes, '
+        f'{c.closure_d:g} mm for the single closure hole.',
         'A folded panel will not sit flat under a punch, so all punching happens while the piece',
         'is still flat. Punch into end grain or a poly board.',
         'The dotted ring around each hole on the template is the eyelet FLANGE footprint, drawn',
@@ -633,19 +670,23 @@ def instruction_page(c, n, total, single, W=W_LETTER):
 
     head('5  SET THE EYELETS')
     body([
-        f'12 eyelets at {c.hole_d:g} mm for the elastics, 1 at {c.closure_d:g} mm for the closure.',
+        f'{c.n_elastic} eyelets at {c.hole_d:g} mm for the elastics, '
+        f'1 at {c.closure_d:g} mm for the closure.',
         'Set from the OUTSIDE so the finished flange shows on the outside of the spine and the',
         'rolled side sits inside where the inserts run.',
         'Work from the middle of each cluster outward, and check the piece stays flat - a spine',
-        'with 12 eyelets in it will bow if you over-set them.',
+        f'with {c.n_elastic} eyelets in it will bow if you over-set them.',
     ])
 
     head('6  CREASE, THEN ASSEMBLE')
     body([
         'Dampen the grain slightly and run a bone folder along a straight edge on each of the',
         'three solid fold lines. Fold away from the grain side.',
-        'Closure elastic first, then the three insert elastics: out through the INNER hole of',
-        'each cluster, across the 7 mm bar, back in through the OUTER hole, stopper knot inside.',
+        'Closure elastic first, then the three insert elastics.',
+        ('Each one goes out through the INNER hole of a cluster, across the '
+         f'{c.row_gap:g} mm bar, back in through the OUTER hole, stopper knot inside.'
+         if c.n_rows > 1 else
+         'Each one goes out through its hole and is stopped with a knot on the inside.'),
     ])
 
     return ''.join(s)
@@ -865,8 +906,7 @@ def check(c):
     if c.flange_to_edge < 5.0:
         problems.append(f'{c.name}: only {c.flange_to_edge:g} mm from flange to the head edge')
     # the closure hole must not crowd the inner row
-    closure_gap = (c.panel_h / 2.0 - (c.y_inset + c.row_gap)
-                   - c.flange_d / 2.0 - c.flange_d / 2.0)
+    closure_gap = c.panel_h / 2.0 - c.inner_row - c.flange_d
     if closure_gap < 10.0:
         problems.append(f'{c.name}: only {closure_gap:g} mm between the inner row and the closure')
     if c.panel_w - c.insert_w < 3.0:
