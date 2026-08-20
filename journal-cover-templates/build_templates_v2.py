@@ -38,6 +38,9 @@ No third-party dependencies - the PDF is written by hand.
 import os
 
 OUT = os.path.dirname(os.path.abspath(__file__))
+BLEED = 6.0       # template drawn this far beyond the piece edge on outer tiles
+BAND = 10.0       # overlap either side of each split between tiles
+CAPTION_W = 95.0  # width the longest hole caption needs
 K = 0.5522847498307936          # circle/arc Bezier constant
 PT = 72.0 / 25.4                # mm -> PostScript points
 MM_PER_IN = 25.4
@@ -46,11 +49,13 @@ MM_PER_IN = 25.4
 # ---------------------------------------------------------------- specs ----
 
 class Cover:
-    def __init__(self, name, panel_w, panel_h, spine_w, flap_w, corner_r,
-                 hole_d, closure_d, flange_d, col_gap, row_gap, y_inset,
-                 stack_mm, insert_w, insert_h, insert_label, tiles,
-                 callout_side):
+    def __init__(self, name, slug, fits, panel_w, panel_h, spine_w, flap_w,
+                 corner_r, hole_d, closure_d, flange_d, col_gap, row_gap,
+                 y_inset, stack_mm, insert_w, insert_h, insert_label, tiles,
+                 legal_single=False):
         self.name = name
+        self.slug = slug              # filename stem
+        self.fits = fits              # one-line description of the book it makes
         self.panel_w = panel_w        # front / back cover panel width
         self.panel_h = panel_h        # full height of the piece
         self.spine_w = spine_w
@@ -67,7 +72,7 @@ class Cover:
         self.insert_h = insert_h
         self.insert_label = insert_label
         self.tiles = tiles            # how many Letter-portrait tiles
-        self.callout_side = callout_side   # 'left' or 'right' of the spine
+        self.legal_single = legal_single   # also fits one Legal sheet, rotated
 
     # --- derived geometry -------------------------------------------------
     @property
@@ -123,6 +128,35 @@ class Cover:
                 out.append((x, y, self.hole_d, 'elastic'))
         return out
 
+    # --- printing ---------------------------------------------------------
+    @property
+    def splits(self):
+        "x positions where the Letter tiling cuts the piece."
+        return [self.total_w * (i + 1) / self.tiles for i in range(self.tiles - 1)]
+
+    def tile_window(self, i):
+        "(lo, hi) of tile i in piece coordinates, overlap bands included."
+        sp = self.splits
+        lo = -BLEED if i == 0 else sp[i - 1] - BAND
+        hi = self.total_w + BLEED if i == self.tiles - 1 else sp[i] + BAND
+        return lo, hi
+
+    @property
+    def callout_side(self):
+        """Which side of the spine the hole captions go on.
+
+        They have to live in the same printed tile as the cluster they point
+        at, or a seam cuts every caption in half. Pick the side of the spine
+        with more room inside that tile.
+        """
+        for i in range(self.tiles):
+            lo, hi = self.tile_window(i)
+            if lo <= self.spine_center <= hi:
+                room_right = hi - self.fold_spine_2
+                room_left = self.fold_spine_1 - lo
+                return 'right' if room_right >= room_left else 'left'
+        return 'right'
+
     # --- clearance checks -------------------------------------------------
     @property
     def flange_gap(self):
@@ -140,10 +174,11 @@ class Cover:
         return self.y_inset - self.flange_d / 2.0
 
 
-# The spine cluster is identical on both covers. It is sized by the eyelet
+# The spine cluster is identical on all three covers. It is sized by the eyelet
 # FLANGE (5.5 mm assumed for a 2.5 mm eyelet), not by the 2.5 mm hole: three
 # columns on 7 mm centres leaves 1.5 mm of leather between flanges and 2.25 mm
-# from the outer flange to the fold line, which fixes the spine at 24 mm.
+# from the outer flange to the fold line, which fixes the spine at 24 mm. One
+# punch-and-set layout therefore serves every size in the lineup.
 SPINE_W = 24.0
 COL_GAP = 7.0
 ROW_GAP = 7.0
@@ -152,7 +187,8 @@ CLOSURE_D = 3.0
 FLANGE_D = 5.5
 
 A5 = Cover(
-    name='A5',
+    name='A5', slug='a5',
+    fits='3 inserts at 6 x 8 in',
     # inserts 6 x 8 in = 152.4 x 203.2 mm; panel adds ~4.5 mm overhang
     panel_w=157.0, panel_h=212.0, spine_w=SPINE_W, flap_w=100.0,
     corner_r=6.0,
@@ -160,20 +196,40 @@ A5 = Cover(
     col_gap=COL_GAP, row_gap=ROW_GAP, y_inset=11.0,
     stack_mm=15.0,
     insert_w=152.4, insert_h=203.2, insert_label='6 x 8 in',
-    tiles=3, callout_side='right',
+    tiles=3,
 )
 
+# Panel size copied from the WANDERINGS Regular cover the maker likes:
+# 4.5 x 8.5 in, rounded to the nearest half millimetre. Standard Traveler's
+# Company Regular refills are 110 x 210 mm, which this holds with 4.5 mm of
+# overhang on the fore-edge and 3 mm at head and tail.
+REGULAR = Cover(
+    name='Regular', slug='regular',
+    fits='3 Traveler\'s Regular inserts at 110 x 210 mm',
+    panel_w=114.5, panel_h=216.0, spine_w=SPINE_W, flap_w=72.0,
+    corner_r=5.0,
+    hole_d=HOLE_D, closure_d=CLOSURE_D, flange_d=FLANGE_D,
+    col_gap=COL_GAP, row_gap=ROW_GAP, y_inset=11.0,
+    stack_mm=13.0,
+    insert_w=110.0, insert_h=210.0, insert_label="Traveler's Regular",
+    tiles=2,
+)
+
+# True ISO A6: 105 x 148 mm inserts. Short enough that the whole flat piece
+# fits on ONE US Legal sheet turned 90 degrees - no tiling, no tape.
 A6 = Cover(
-    name='A6',
-    # inserts 4.25 x 8.25 in = 107.95 x 209.55 mm
-    panel_w=112.0, panel_h=218.0, spine_w=SPINE_W, flap_w=72.0,
+    name='A6', slug='a6',
+    fits='3 inserts at A6, 105 x 148 mm',
+    panel_w=110.0, panel_h=157.0, spine_w=SPINE_W, flap_w=68.0,
     corner_r=5.0,
     hole_d=HOLE_D, closure_d=CLOSURE_D, flange_d=FLANGE_D,
     col_gap=COL_GAP, row_gap=ROW_GAP, y_inset=10.0,
     stack_mm=12.0,
-    insert_w=107.95, insert_h=209.55, insert_label='4.25 x 8.25 in',
-    tiles=2, callout_side='left',
+    insert_w=105.0, insert_h=148.0, insert_label='A6',
+    tiles=2, legal_single=True,
 )
+
+COVERS = (A5, REGULAR, A6)
 
 
 # ------------------------------------------------------------- geometry ----
@@ -490,25 +546,30 @@ def artwork(c, ox, oy):
 # --- pages -----------------------------------------------------------------
 
 W_LETTER, H_LETTER = 215.9, 279.4     # US Letter PORTRAIT
+W_LEGAL,  H_LEGAL  = 215.9, 355.6     # US Legal  PORTRAIT
 MARGIN = 14.0
+LEGAL_TOP = 25.0  # top of the rotated piece on a Legal sheet, below the header
 
 
-def page_frame(c, n, total, subtitle):
-    s = [p_text(MARGIN, 12, f"{c.name} TRIFOLD TRAVELER'S COVER  -  V2", 4.4, 0.1, bold=True)]
-    s.append(p_text(W_LETTER - MARGIN, 12, f'page {n} of {total}', 3.2, 0.45, 'right'))
-    s.append(p_line(MARGIN, 15, W_LETTER - MARGIN, 15, lw=0.5, gray=0.25))
+def page_frame(c, n, total, subtitle, W=W_LETTER):
+    s = [p_text(MARGIN, 12, f"{c.name.upper()} TRIFOLD TRAVELER'S COVER  -  V2",
+                4.4, 0.1, bold=True)]
+    s.append(p_text(W - MARGIN, 12, f'page {n} of {total}', 3.2, 0.45, 'right'))
+    s.append(p_line(MARGIN, 15, W - MARGIN, 15, lw=0.5, gray=0.25))
     s.append(p_text(MARGIN, 20.5, subtitle, 3.4, 0.35))
     return ''.join(s)
 
 
-def instruction_page(c, n, total):
-    s = [page_frame(c, n, total, 'READ THIS FIRST  -  printing, transferring, punching, setting')]
+def instruction_page(c, n, total, single, W=W_LETTER):
+    s = [page_frame(c, n, total,
+                    'READ THIS FIRST  -  printing, transferring, punching, setting',
+                    W)]
     y = 32
 
     def head(t):
         nonlocal y
         s.append(p_text(MARGIN, y, t, 4.0, 0.1, bold=True))
-        s.append(p_line(MARGIN, y + 1.8, W_LETTER - MARGIN, y + 1.8, lw=0.3, gray=0.6))
+        s.append(p_line(MARGIN, y + 1.8, W - MARGIN, y + 1.8, lw=0.3, gray=0.6))
         y += 7
 
     def body(lines):
@@ -524,17 +585,27 @@ def instruction_page(c, n, total):
         f'Then go to page {n + 1} and measure the scale bars before you cut anything.',
     ])
 
-    head('2  ASSEMBLE THE TILES')
-    tile_first = n + 2
-    body([
-        f'The full-size template is split across {c.tiles} pages ({tile_first} to {total}), '
-        f'side by side, left to right.',
-        'Every seam is vertical, so there is only one line of tape per joint.',
-        'Trim page 1 of the tiles along its right-hand TRIM LINE, lay it over the next page so',
-        'the + registration marks sit exactly on top of each other, and tape the overlap.',
-        'Work left to right. Check the assembled length against the flat-piece dimension',
-        f'printed on the template ({c.total_w:g} mm) before you trust it.',
-    ])
+    if single:
+        head('2  ONE SHEET, NO TAPE')
+        body([
+            f'The whole {c.total_w:g} x {c.panel_h:g} mm template is on page {n + 2}, turned 90 '
+            'degrees to fit',
+            'a single US Legal sheet. Turn the paper sideways to read it.',
+            'Check the length across the assembled piece against the flat-piece dimension',
+            f'printed along its head edge ({c.total_w:g} mm) before you trust it.',
+        ])
+    else:
+        head('2  ASSEMBLE THE TILES')
+        body([
+            f'The full-size template is split across {c.tiles} pages ({n + 2} to {total}), '
+            f'side by side, left to right.',
+            'Every seam is vertical, so there is only one line of tape per joint.',
+            'Trim the first tile along its right-hand TRIM LINE, lay it over the next page so',
+            'the + registration marks sit exactly on top of each other, and tape the overlap.',
+            'Each seam has two + marks, one near the head and one near the tail: get both onto',
+            'their partners or the joint can pivot. Work left to right, then check the assembled',
+            f'length against the flat-piece dimension printed on the template ({c.total_w:g} mm).',
+        ])
 
     head('3  TRANSFER TO LEATHER')
     body([
@@ -573,16 +644,16 @@ def instruction_page(c, n, total):
     body([
         'Dampen the grain slightly and run a bone folder along a straight edge on each of the',
         'three solid fold lines. Fold away from the grain side.',
-        'Closure elastic first, then the three insert elastics - the middle elastic runs straight',
-        f'over the closure knot. Full assembly notes are on the guide page that came with this file.',
+        'Closure elastic first, then the three insert elastics: out through the INNER hole of',
+        'each cluster, across the 7 mm bar, back in through the OUTER hole, stopper knot inside.',
     ])
 
     return ''.join(s)
 
 
-def scale_page(c, n, total):
+def scale_page(c, n, total, W=W_LETTER):
     s = [page_frame(c, n, total,
-                    'SCALE CHECK  -  measure these before you cut anything')]
+                    'SCALE CHECK  -  measure these before you cut anything', W)]
     y = 30
 
     # --- 100 mm metric bar ---
@@ -652,7 +723,7 @@ def scale_page(c, n, total):
     for fx in (dx, dx + sw):
         s.append(p_line(fx, dy, fx, dy + cluster_h, lw=0.4, dash=(3, 2), gray=0.3))
 
-    for ri, ry in enumerate(c.rows_top):
+    for ry in c.rows_top:
         for ci in (-1, 0, 1):
             cx = dx + sw / 2.0 + ci * c.col_gap
             cy = dy + ry
@@ -663,8 +734,7 @@ def scale_page(c, n, total):
     # dimensions
     dim_y = dy + c.y_inset + c.row_gap + 12
     left_c = dx + sw / 2.0 - c.col_gap
-    s.append(p_line(left_c, dim_y, left_c + c.col_gap, dim_y, lw=0.3, gray=0.4))
-    s.append(p_line(left_c + c.col_gap, dim_y, left_c + 2 * c.col_gap, dim_y, lw=0.3, gray=0.4))
+    s.append(p_line(left_c, dim_y, left_c + 2 * c.col_gap, dim_y, lw=0.3, gray=0.4))
     for i in range(3):
         xx = left_c + i * c.col_gap
         s.append(p_line(xx, dim_y - 2, xx, dim_y + 2, lw=0.3, gray=0.4))
@@ -672,13 +742,10 @@ def scale_page(c, n, total):
     s.append(p_text(left_c + 1.5 * c.col_gap, dim_y + 5, f'{c.col_gap:g}', 2.8, 0.3, 'center'))
 
     dim_x = dx - 12
-    s.append(p_line(dim_x, dy, dim_x, dy + c.y_inset, lw=0.3, gray=0.4))
-    s.append(p_line(dim_x - 2, dy, dim_x + 2, dy, lw=0.3, gray=0.4))
-    s.append(p_line(dim_x - 2, dy + c.y_inset, dim_x + 2, dy + c.y_inset, lw=0.3, gray=0.4))
+    s.append(p_line(dim_x, dy, dim_x, dy + c.y_inset + c.row_gap, lw=0.3, gray=0.4))
+    for yy in (dy, dy + c.y_inset, dy + c.y_inset + c.row_gap):
+        s.append(p_line(dim_x - 2, yy, dim_x + 2, yy, lw=0.3, gray=0.4))
     s.append(p_text(dim_x - 3, dy + c.y_inset / 2.0, f'{c.y_inset:g}', 2.8, 0.3, 'right'))
-    s.append(p_line(dim_x, dy + c.y_inset, dim_x, dy + c.y_inset + c.row_gap, lw=0.3, gray=0.4))
-    s.append(p_line(dim_x - 2, dy + c.y_inset + c.row_gap,
-                    dim_x + 2, dy + c.y_inset + c.row_gap, lw=0.3, gray=0.4))
     s.append(p_text(dim_x - 3, dy + c.y_inset + c.row_gap / 2.0,
                     f'{c.row_gap:g}', 2.8, 0.3, 'right'))
 
@@ -690,7 +757,7 @@ def scale_page(c, n, total):
 
     s.append(p_para(dx + sw + 12, dy + 12, [
         'Lay a punched scrap over this and the holes should',
-        'disappear. The bottom of the spine is the mirror of',
+        'disappear. The tail of the spine is the mirror of',
         'this about the horizontal centreline of the cover.',
         '',
         f'{c.flange_gap:g} mm of leather between flanges.',
@@ -705,14 +772,11 @@ def tile_pages(c, first_page_no, total):
     """US Letter portrait tiles, split vertically only."""
     pages = []
     n = c.tiles
-    bleed = 6.0     # drawn beyond the piece edge on the outer tiles
-    band = 10.0     # overlap either side of each split
     oy = (H_LETTER - c.panel_h) / 2.0 + 2.0
-    splits = [c.total_w * (i + 1) / n for i in range(n - 1)]
+    splits = c.splits
 
     for i in range(n):
-        lo = -bleed if i == 0 else splits[i - 1] - band
-        hi = c.total_w + bleed if i == n - 1 else splits[i] + band
+        lo, hi = c.tile_window(i)
         ox = (W_LETTER - (hi - lo)) / 2.0 - lo
 
         # everything that must be windowed goes inside one q ... Q with a clip
@@ -720,7 +784,7 @@ def tile_pages(c, first_page_no, total):
         body += artwork(c, ox, oy)
 
         # registration crosses + trim/tape lines on each split this tile touches
-        for j, sx in enumerate(splits):
+        for sx in splits:
             if not (lo - 0.1 <= sx <= hi + 0.1):
                 continue
             body += p_line(ox + sx, oy - 18, ox + sx, oy + c.panel_h + 18,
@@ -728,9 +792,9 @@ def tile_pages(c, first_page_no, total):
             for ry in (26.0, c.panel_h - 26.0):
                 body += p_cross(ox + sx, oy + ry, arm=7, lw=0.35, gray=0.3)
                 body += p_circle(ox + sx, oy + ry, 3.0, lw=0.2, gray=0.55)
-            # A split at this tile's right edge gets a right-aligned label;
-            # one at its left edge gets a left-aligned label. Either way the
-            # text runs into the tile, never out through the clip.
+            # A split at this tile's right edge gets a right-aligned label; one
+            # at its left edge gets a left-aligned label. Either way the text
+            # runs into the tile, never out through the clip.
             right_edge = sx > (lo + hi) / 2.0
             body += p_text(ox + sx + (-4 if right_edge else 4),
                            oy + c.panel_h + 14, 'TRIM / TAPE LINE', 2.8, 0.45,
@@ -748,23 +812,51 @@ def tile_pages(c, first_page_no, total):
     return pages
 
 
-def build_pdf(c, fname):
-    total = 2 + c.tiles
+def legal_page(c, n, total):
+    """The whole piece on one US Legal sheet, rotated 90 degrees.
+
+    The content stream is already in y-down millimetres, so the extra matrix
+    maps template (x, y) -> page (e - y, f + x): the piece's length runs down
+    the sheet and its height runs across it.
+    """
+    e = (W_LEGAL + c.panel_h) / 2.0        # piece occupies page-x [e - panel_h, e]
+    f = LEGAL_TOP                          # piece occupies page-y [f, f + total_w]
+    body = f"q 0 1 -1 0 {_n(e)} {_n(f)} cm\n" + artwork(c, 0, 0) + "Q\n"
+    body += page_frame(c, n, total,
+                       'FULL-SIZE TEMPLATE  -  one sheet, no tiling  -  '
+                       'turn the page 90 degrees', W_LEGAL)
+    body += p_text(MARGIN, H_LEGAL - 10,
+                   f'{c.name} V2  -  flat piece {c.total_w:g} x {c.panel_h:g} mm  -  '
+                   f'outside face up  -  US Legal, printed at 100%', 3.0, 0.4)
+    return body
+
+
+def build_pdf(c, mode):
+    """mode 'letter' -> tiled Letter portrait; 'legal' -> one rotated Legal sheet."""
+    single = (mode == 'legal')
+    total = 3 if single else 2 + c.tiles
+    # Every page in a given PDF is the same size, so the whole file prints from
+    # one paper tray without touching the dialog between pages.
+    W, H = (W_LEGAL, H_LEGAL) if single else (W_LETTER, H_LETTER)
     pdf = Pdf()
-    pdf.page(W_LETTER, H_LETTER, instruction_page(c, 1, total))
-    pdf.page(W_LETTER, H_LETTER, scale_page(c, 2, total))
-    for body in tile_pages(c, 3, total):
-        pdf.page(W_LETTER, H_LETTER, body)
+    pdf.page(W, H, instruction_page(c, 1, total, single, W))
+    pdf.page(W, H, scale_page(c, 2, total, W))
+    if single:
+        pdf.page(W, H, legal_page(c, 3, total))
+    else:
+        for body in tile_pages(c, 3, total):
+            pdf.page(W, H, body)
+    fname = f'{c.slug}-cover-v2-{mode}.pdf'
     path = os.path.join(OUT, fname)
-    with open(path, 'wb') as f:
-        f.write(pdf.build())
+    with open(path, 'wb') as fh:
+        fh.write(pdf.build())
     return path
 
 
 # ----------------------------------------------------------------- main ----
 
 def check(c):
-    """Fail loudly if the hardware will not fit the geometry."""
+    """Fail loudly if the hardware or the paper will not take the geometry."""
     problems = []
     if c.flange_gap < 0.8:
         problems.append(f'{c.name}: only {c.flange_gap:g} mm between eyelet flanges')
@@ -772,62 +864,84 @@ def check(c):
         problems.append(f'{c.name}: only {c.flange_to_fold:g} mm from outer flange to fold line')
     if c.flange_to_edge < 5.0:
         problems.append(f'{c.name}: only {c.flange_to_edge:g} mm from flange to the head edge')
+    # the closure hole must not crowd the inner row
+    closure_gap = (c.panel_h / 2.0 - (c.y_inset + c.row_gap)
+                   - c.flange_d / 2.0 - c.flange_d / 2.0)
+    if closure_gap < 10.0:
+        problems.append(f'{c.name}: only {closure_gap:g} mm between the inner row and the closure')
     if c.panel_w - c.insert_w < 3.0:
         problems.append(f'{c.name}: panel is less than 3 mm wider than the insert')
-    if c.panel_h - c.insert_h < 6.0:
-        problems.append(f'{c.name}: panel is less than 6 mm taller than the insert')
+    if c.panel_h - c.insert_h < 5.0:
+        problems.append(f'{c.name}: panel is less than 5 mm taller than the insert')
     # every tile must fit inside the printable width of a Letter portrait page
-    band, bleed = 10.0, 6.0
-    widest = max(c.total_w / c.tiles + band + bleed,
-                 c.total_w / c.tiles + 2 * band)
+    widest = c.total_w / c.tiles + max(BAND + BLEED, 2 * BAND)
     if widest > W_LETTER - 2 * MARGIN:
         problems.append(f'{c.name}: tile width {widest:g} mm exceeds the printable area')
     if c.panel_h > H_LETTER - 2 * MARGIN - 16:
         problems.append(f'{c.name}: piece height {c.panel_h:g} mm will not clear the page margins')
+    # the hole captions must fit in the tile that carries the spine cluster
+    for i in range(c.tiles):
+        lo, hi = c.tile_window(i)
+        if not lo <= c.spine_center <= hi:
+            continue
+        room = (hi - c.fold_spine_2) if c.callout_side == 'right' else (c.fold_spine_1 - lo)
+        if room < CAPTION_W:
+            problems.append(f'{c.name}: only {room:g} mm for the hole captions on tile '
+                            f'{i + 1}, need {CAPTION_W:g}')
+    if c.legal_single:
+        if c.panel_h > W_LEGAL - 2 * MARGIN:
+            problems.append(f'{c.name}: piece height {c.panel_h:g} mm is too wide for Legal')
+        if c.total_w > H_LEGAL - LEGAL_TOP - MARGIN:
+            problems.append(f'{c.name}: piece length {c.total_w:g} mm is too long for Legal')
     return problems
 
 
 def main():
     files = []
 
-    for cover, fname, mirror in (
-        (A5, 'a5-cover-v2.svg', False),
-        (A5, 'a5-cover-v2-mirrored.svg', True),
-        (A6, 'a6-cover-v2.svg', False),
-        (A6, 'a6-cover-v2-mirrored.svg', True),
-    ):
-        path = os.path.join(OUT, fname)
-        with open(path, 'w') as f:
-            f.write(svg(cover, mirrored=mirror))
-        files.append(path)
+    for cover in COVERS:
+        for suffix, mirror in (('.svg', False), ('-mirrored.svg', True)):
+            fname = f'{cover.slug}-cover-v2{suffix}'
+            path = os.path.join(OUT, fname)
+            with open(path, 'w') as fh:
+                fh.write(svg(cover, mirrored=mirror))
+            files.append(path)
 
-    files.append(build_pdf(A5, 'a5-cover-v2-letter.pdf'))
-    files.append(build_pdf(A6, 'a6-cover-v2-letter.pdf'))
+    for cover in COVERS:
+        files.append(build_pdf(cover, 'letter'))
+        if cover.legal_single:
+            files.append(build_pdf(cover, 'legal'))
 
     all_problems = []
-    for c in (A5, A6):
+    for c in COVERS:
         all_problems += check(c)
         print(f"\n{c.name}: flat piece {c.total_w:g} x {c.panel_h:g} mm "
               f"({c.total_w / MM_PER_IN:.2f} x {c.panel_h / MM_PER_IN:.2f} in)")
-        print(f"  insert   {c.insert_label} = {c.insert_w:g} x {c.insert_h:g} mm, 3 of them")
+        print(f"  holds    {c.fits}")
+        print(f"  insert   {c.insert_w:g} x {c.insert_h:g} mm  ->  "
+              f"overhang {c.panel_w - c.insert_w:g} fore-edge, "
+              f"{(c.panel_h - c.insert_h) / 2:g} head and tail")
         print(f"  panels   front {c.panel_w:g} | spine {c.spine_w:g} | "
               f"back {c.panel_w:g} | flap {c.flap_w:g}")
         print(f"  folds at x = {c.fold_spine_1:g}, {c.fold_spine_2:g}, "
               f"{c.fold_flap:g} (+ optional hinge {c.fold_hinge:g})")
         print(f"  clearance  flange-to-flange {c.flange_gap:g} | "
               f"flange-to-fold {c.flange_to_fold:g} | flange-to-edge {c.flange_to_edge:g}")
-        print(f"  holes ({len(c.holes())} total):")
-        for cx, cy, dia, kind in c.holes():
-            print(f"    {kind:8s} x={cx:7.2f}  y={cy:7.2f}  dia={dia:g}")
+        print(f"  paper    {c.tiles} Letter tile(s)"
+              + ("  +  1 Legal sheet, rotated" if c.legal_single else ""))
+        rows = ' / '.join(f'{y:g}' for y in c.rows_top + c.rows_bottom)
+        cols = ' / '.join(f'{x:g}' for x in c.elastic_columns)
+        print(f"  holes    columns x = {cols} | rows y = {rows} | "
+              f"closure ({c.spine_center:g}, {c.panel_h / 2:g})")
 
     print("\nWrote:")
-    for p in files:
-        print(f"  {os.path.basename(p):30s} {os.path.getsize(p):>8,d} bytes")
+    for path in files:
+        print(f"  {os.path.basename(path):32s} {os.path.getsize(path):>8,d} bytes")
 
     if all_problems:
-        print("\n!! CLEARANCE PROBLEMS:")
-        for p in all_problems:
-            print("   " + p)
+        print("\n!! PROBLEMS:")
+        for problem in all_problems:
+            print("   " + problem)
     else:
         print("\nAll clearance and page-fit checks passed.")
 

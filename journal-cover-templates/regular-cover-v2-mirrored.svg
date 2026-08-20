@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Regular trifold traveler's cover V2 (MIRRORED)
+     Piece: 325 x 216 mm. Verify this size after importing.
+     Layer "CUT"  = outline + 13 holes (12 elastic @ 2.5 mm, 1 closure @ 3 mm).
+     Layer "FOLD" = score lines: set FOLD to Pen/Draw or delete it.
+     Do NOT leave FOLD set to Cut - it will slice the cover into strips. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+     width="325mm" height="216mm" viewBox="0 0 325 216">
+<g id="CUT">
+  <path fill="#000000" fill-rule="evenodd" stroke="none"
+        d="M 5,0 H 320 A 5,5 0 0 1 325,5 V 211 A 5,5 0 0 1 320,216 H 5 A 5,5 0 0 1 0,211 V 5 A 5,5 0 0 1 5,0 Z M 204.25,11 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 197.25,11 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 190.25,11 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 204.25,18 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 197.25,18 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 190.25,18 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 197,108 a 1.5,1.5 0 1 0 3,0 a 1.5,1.5 0 1 0 -3,0 Z M 204.25,198 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 197.25,198 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 190.25,198 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 204.25,205 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 197.25,205 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z M 190.25,205 a 1.25,1.25 0 1 0 2.5,0 a 1.25,1.25 0 1 0 -2.5,0 Z"/>
+</g>
+<g id="FOLD" fill="none" stroke="#e2001a" stroke-width="0.25">
+  <line x1="210.5" y1="0" x2="210.5" y2="216"/>
+  <line x1="186.5" y1="0" x2="186.5" y2="216"/>
+  <line x1="72" y1="0" x2="72" y2="216"/>
+  <line x1="58" y1="0" x2="58" y2="216" stroke-dasharray="4 3"/>
+</g>
+</svg>
