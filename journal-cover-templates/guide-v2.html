@@ -1,0 +1,1372 @@
+<title>Carnet Trifold Patterns V2</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400..600&display=swap">
+
+<style>
+  /* ============================================================
+     Drafting stock, graphite, brass. Light is the base palette;
+     both dark states re-declare the same token names.
+     ============================================================ */
+  :root {
+    --paper:  #EFEEE9;
+    --surf:   #F9F8F4;
+    --surf2:  #E3E1D9;
+    --ink:    #16181C;
+    --ink2:   #3B3F46;
+    --muted:  #6E727A;
+    --rule:   #D5D2CA;
+    --rule2:  #BEBBB1;
+    --brass:  #8A6A1F;   /* accent - the eyelets */
+    --brasstint: #EDE4CC;
+    --score:  #A34428;   /* fold + score lines */
+    --dim:    #45607A;   /* dimension + technical lines */
+    --flag:   #F0E6DF;   /* callout ground */
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "Newsreader", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:  #121316;
+      --surf:   #1A1C20;
+      --surf2:  #24272C;
+      --ink:    #E8E8E3;
+      --ink2:   #C1C3BD;
+      --muted:  #8C9098;
+      --rule:   #2C2F34;
+      --rule2:  #3D4148;
+      --brass:  #D9B45E;
+      --brasstint: #332C18;
+      --score:  #E28A6E;
+      --dim:    #8FADC7;
+      --flag:   #2A211C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:  #121316;
+    --surf:   #1A1C20;
+    --surf2:  #24272C;
+    --ink:    #E8E8E3;
+    --ink2:   #C1C3BD;
+    --muted:  #8C9098;
+    --rule:   #2C2F34;
+    --rule2:  #3D4148;
+    --brass:  #D9B45E;
+    --brasstint: #332C18;
+    --score:  #E28A6E;
+    --dim:    #8FADC7;
+    --flag:   #2A211C;
+  }
+
+  /* ---- base ------------------------------------------------- */
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-optical-sizing: auto;
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 22px 110px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+  .col  { max-width: 66ch; }
+
+  h1, h2, h3 {
+    font-family: var(--display);
+    font-variation-settings: "wdth" 112;
+    font-weight: 700;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.005em;
+  }
+  h1 { font-size: clamp(2.1rem, 5.6vw, 3.35rem); line-height: 1.02;
+       font-variation-settings: "wdth" 118; }
+  h2 { font-size: clamp(1.3rem, 2.9vw, 1.7rem); line-height: 1.14; }
+  h3 { font-size: 1.02rem; font-variation-settings: "wdth" 105; font-weight: 600;
+       line-height: 1.3; }
+  p  { margin: 0; }
+  a  { color: var(--brass); text-underline-offset: 2px; }
+  em { font-style: italic; }
+  strong { font-weight: 600; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.67rem; letter-spacing: 0.15em;
+    color: var(--muted); margin: 0; text-transform: uppercase;
+  }
+
+  /* ---- rhythm ------------------------------------------------ */
+  header.masthead { display: flex; flex-direction: column; gap: 20px; padding: 76px 0 0; }
+  main    { display: flex; flex-direction: column; gap: 74px; padding-top: 64px; }
+  section { display: flex; flex-direction: column; gap: 24px; }
+  .stack  { display: flex; flex-direction: column; gap: 15px; }
+  .stack-s{ display: flex; flex-direction: column; gap: 8px; }
+
+  /* section header reads like a drawing sheet's title block */
+  .sheet-head {
+    display: grid; grid-template-columns: 3.4rem 1fr; gap: 4px 16px;
+    border-top: 2px solid var(--ink); padding-top: 12px; align-items: baseline;
+  }
+  .sheet-head .no {
+    font-family: var(--mono); font-size: 0.85rem; color: var(--brass);
+    font-variant-numeric: tabular-nums; grid-row: span 2;
+  }
+  .sheet-head .eyebrow { grid-column: 2; }
+  .sheet-head h2 { grid-column: 2; }
+  @media (max-width: 560px) {
+    .sheet-head { grid-template-columns: 1fr; }
+    .sheet-head .no { grid-row: auto; }
+    .sheet-head .eyebrow, .sheet-head h2 { grid-column: 1; }
+  }
+
+  /* ---- masthead ---------------------------------------------- */
+  .lede { font-size: 1.15rem; color: var(--ink2); max-width: 58ch; }
+
+  /* Cell borders rather than a background showing through 1px gaps: with five
+     items the last row is short, and a gap-drawn grid renders that remainder
+     as a stray filled block. */
+  .glance {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+    border-top: 1px solid var(--rule); border-left: 1px solid var(--rule);
+    margin-top: 10px;
+  }
+  .glance > div { background: var(--surf); padding: 15px 17px;
+                  border-right: 1px solid var(--rule);
+                  border-bottom: 1px solid var(--rule);
+                  display: flex; flex-direction: column; gap: 2px; }
+  .glance dt { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.13em;
+               color: var(--muted); text-transform: uppercase; }
+  .glance dd { margin: 0; font-family: var(--display);
+               font-variation-settings: "wdth" 100; font-weight: 600;
+               font-size: 1.42rem; font-variant-numeric: tabular-nums;
+               letter-spacing: -0.02em; }
+  .glance .sub { font-size: 0.83rem; color: var(--muted); font-family: var(--body); }
+
+  /* ---- drawing frames ---------------------------------------- */
+  figure { margin: 0; display: flex; flex-direction: column; gap: 0; }
+  .frame { border: 1px solid var(--rule2); background: var(--surf); }
+  .frame .plate { overflow-x: auto; padding: 20px 18px 14px; }
+  .frame svg { display: block; width: 100%; height: auto; }
+  .titleblock {
+    border-top: 1px solid var(--rule2); display: flex; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.06em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .titleblock span { padding: 7px 14px; border-right: 1px solid var(--rule2); }
+  .titleblock span:last-child { border-right: none; }
+  .titleblock .k { color: var(--ink2); }
+  figcaption { font-size: 0.89rem; color: var(--muted); max-width: 64ch;
+               padding-top: 11px; line-height: 1.55; }
+
+  /* svg ink classes - every one resolves from the token set */
+  .s-ink   { stroke: var(--ink);   fill: none; }
+  .s-inkf  { fill: var(--ink);     stroke: none; }
+  .s-surf  { fill: var(--surf2);   stroke: none; }
+  .s-paper { fill: var(--surf);    stroke: none; }
+  .s-score { stroke: var(--score); fill: none; }
+  .s-scoref{ fill: var(--score);   stroke: none; }
+  .s-hole  { stroke: var(--ink);   fill: var(--surf); }
+  .s-brass { stroke: var(--brass); fill: none; }
+  .s-brassf{ fill: var(--brass);   stroke: none; }
+  .s-brasst{ fill: var(--brasstint); stroke: none; }
+  .s-dim   { stroke: var(--dim);   fill: none; }
+  .t       { fill: var(--ink);   font-family: var(--display);
+             font-variation-settings: "wdth" 105; font-weight: 600; }
+  .tm      { fill: var(--muted); font-family: var(--mono); }
+  .td      { fill: var(--dim);   font-family: var(--mono); }
+  .ts      { fill: var(--score); font-family: var(--mono); }
+  .tb      { fill: var(--brass); font-family: var(--mono); }
+
+  /* ---- tables ------------------------------------------------- */
+  .tbl { overflow-x: auto; border: 1px solid var(--rule); background: var(--surf); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 480px; }
+  th, td { text-align: left; padding: 9px 15px; border-bottom: 1px solid var(--rule); }
+  thead th { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.11em;
+             color: var(--muted); font-weight: 500; text-transform: uppercase;
+             border-bottom: 1.5px solid var(--rule2); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.lab { color: var(--ink2); }
+  td.was { color: var(--muted); text-decoration: line-through;
+           text-decoration-color: var(--rule2); }
+  td.now { color: var(--brass); font-weight: 500; }
+  tbody tr:hover { background: var(--surf2); }
+  caption { caption-side: bottom; text-align: left; padding: 9px 15px;
+            font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--rule); }
+
+  /* ---- steps -------------------------------------------------- */
+  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0;
+             display: flex; flex-direction: column; gap: 20px; }
+  ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 2.1rem 1fr;
+                  gap: 14px; align-items: start; }
+  ol.steps > li::before {
+    content: counter(s, decimal-leading-zero);
+    font-family: var(--mono); font-size: 0.72rem; color: var(--brass);
+    padding-top: 5px; letter-spacing: 0.04em;
+  }
+  ol.steps .stack-s { max-width: 62ch; }
+
+  ul.plain { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column;
+             gap: 8px; max-width: 63ch; }
+  ul.plain li::marker { color: var(--brass); }
+
+  /* ---- callout ------------------------------------------------ */
+  .note {
+    background: var(--flag); border-left: 3px solid var(--score);
+    padding: 16px 19px; display: flex; flex-direction: column; gap: 8px;
+    max-width: 66ch;
+  }
+  .note.brass { border-left-color: var(--brass); background: var(--brasstint); }
+  .note .h { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.13em;
+             color: var(--score); text-transform: uppercase; }
+  .note.brass .h { color: var(--brass); }
+  .note p { font-size: 0.95rem; }
+
+  code, .m { font-family: var(--mono); font-size: 0.86em;
+             background: var(--surf2); padding: 0.12em 0.36em; }
+
+  /* ---- file list ---------------------------------------------- */
+  .files { display: flex; flex-direction: column; gap: 1px; background: var(--rule);
+           border: 1px solid var(--rule); }
+  .files > div { background: var(--surf); padding: 14px 18px;
+                 display: grid; grid-template-columns: minmax(170px, 250px) 1fr;
+                 gap: 5px 22px; align-items: baseline; }
+  .files .fn { font-family: var(--mono); font-size: 0.79rem; color: var(--brass);
+               word-break: break-all; }
+  .files .fd { font-size: 0.92rem; color: var(--ink2); }
+  @media (max-width: 620px) { .files > div { grid-template-columns: 1fr; } }
+
+  footer { margin-top: 80px; padding-top: 20px; border-top: 2px solid var(--ink);
+           font-size: 0.85rem; color: var(--muted); max-width: 64ch;
+           display: flex; flex-direction: column; gap: 10px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Cutting patterns &middot; Trifold traveler's cover &middot; Version 2 &middot; 3 sizes</p>
+  <h1>Carnet Trifold Patterns V2</h1>
+  <p class="lede">Same trifold as before — three elastics, a flap that folds in over the stack,
+    closure anchored on the spine. Rebuilt around double-row eyelet clusters and 2.5&nbsp;mm
+    hardware, in three sizes.</p>
+
+  <div class="glance">
+    <div>
+      <dt>A5 &mdash; flat piece</dt>
+      <dd>438 &times; 212</dd>
+      <span class="sub">mm &middot; 3 tiles on US Letter</span>
+    </div>
+    <div>
+      <dt>Regular &mdash; flat piece</dt>
+      <dd>325 &times; 216</dd>
+      <span class="sub">mm &middot; 2 tiles on US Letter</span>
+    </div>
+    <div>
+      <dt>A6 &mdash; flat piece</dt>
+      <dd>312 &times; 157</dd>
+      <span class="sub">mm &middot; 2 tiles, or 1 Legal sheet</span>
+    </div>
+    <div>
+      <dt>Holes per cover</dt>
+      <dd>12 + 1</dd>
+      <span class="sub">2.5&nbsp;mm elastic &middot; 3&nbsp;mm closure</span>
+    </div>
+    <div>
+      <dt>Spine, all three</dt>
+      <dd>24 mm</dd>
+      <span class="sub">set by the eyelet flange</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">01</span>
+    <p class="eyebrow">What changed</p>
+    <h2>Six holes became twelve, and the spacing follows the hardware</h2>
+  </div>
+
+  <div class="col stack">
+    <p>V1 put a single row of three 3&nbsp;mm holes at each end of the spine, on 6&nbsp;mm
+      centres. That leaves 3&nbsp;mm of bare leather between hole edges, which is fine for
+      bare holes and <em>not</em> fine once a set eyelet puts a flange around each one. A
+      3&nbsp;mm eyelet's flange runs about 6.5&nbsp;mm across; on 6&nbsp;mm centres the
+      flanges physically cannot sit side by side. That's the bulk and overlap you hit.</p>
+    <p>So V2 sizes the spine off the <strong>flange</strong>, not the hole. Your 2.5&nbsp;mm
+      eyelets flange out to roughly 5.5&nbsp;mm, columns go onto 7&nbsp;mm centres, and the
+      second row sits 7&nbsp;mm inboard of the first. That leaves 1.5&nbsp;mm of clear leather
+      between every pair of neighbouring flanges, in both directions.</p>
+  </div>
+
+  <figure>
+    <div class="frame">
+      <div class="plate">
+        <svg viewBox="0 0 700 322" style="min-width:620px" role="img"
+             aria-label="Side-by-side comparison of the V1 and V2 spine layouts. V1 has one row
+                         of three 3 mm holes on 6 mm centres whose eyelet flanges overlap each
+                         other. V2 has two rows of three 2.5 mm holes on 7 mm centres whose
+                         flanges clear each other by 1.5 mm.">
+          <!-- ============ V1, left ============ -->
+          <text class="tm" x="26" y="20" font-size="11">V1 &mdash; ONE ROW, 3 MM ON 6 MM CENTRES</text>
+          <rect class="s-surf" x="26" y="38" width="132" height="238" />
+          <line class="s-ink" x1="4" y1="38" x2="180" y2="38" stroke-width="2.4" />
+          <text class="tm" x="4" y="32" font-size="9.5">head edge</text>
+          <g class="s-score" stroke-width="1.3" stroke-dasharray="9 6">
+            <line x1="26"  y1="38" x2="26"  y2="276" />
+            <line x1="158" y1="38" x2="158" y2="276" />
+          </g>
+          <!-- flanges: r 3.25mm x6 = 19.5, centres 36 apart -> they overlap -->
+          <g class="s-brass" stroke-width="1.4" stroke-dasharray="3 2.5">
+            <circle cx="56"  cy="110" r="19.5" />
+            <circle cx="92"  cy="110" r="19.5" />
+            <circle cx="128" cy="110" r="19.5" />
+          </g>
+          <g class="s-hole" stroke-width="1.6">
+            <circle cx="56"  cy="110" r="9" />
+            <circle cx="92"  cy="110" r="9" />
+            <circle cx="128" cy="110" r="9" />
+          </g>
+          <!-- overlap call-out -->
+          <path class="s-score" stroke-width="1.6" d="M 74,110 L 74,166" />
+          <path class="s-score" stroke-width="1.6" d="M 110,110 L 110,166" />
+          <path class="s-score" stroke-width="1.4" d="M 74,166 L 110,166" />
+          <text class="ts" x="92" y="182" font-size="10" text-anchor="middle">flanges overlap</text>
+          <text class="ts" x="92" y="195" font-size="10" text-anchor="middle">by ~0.5 mm</text>
+          <g class="s-dim" stroke-width="0.9">
+            <path d="M 56,232 L 92,232 M 56,227 L 56,237 M 92,227 L 92,237" />
+            <path d="M 92,232 L 128,232 M 128,227 L 128,237" />
+            <path d="M 26,258 L 158,258 M 26,253 L 26,263 M 158,253 L 158,263" />
+          </g>
+          <text class="td" x="74"  y="248" font-size="10" text-anchor="middle">6</text>
+          <text class="td" x="110" y="248" font-size="10" text-anchor="middle">6</text>
+          <text class="td" x="92"  y="274" font-size="10" text-anchor="middle">22 spine</text>
+          <text class="tm" x="92"  y="300" font-size="10" text-anchor="middle">6 holes per cover</text>
+
+          <!-- ============ V2, right ============ -->
+          <text class="tb" x="386" y="20" font-size="11">V2 &mdash; TWO ROWS, 2.5 MM ON 7 MM CENTRES</text>
+          <rect class="s-surf" x="386" y="38" width="144" height="238" />
+          <line class="s-ink" x1="364" y1="38" x2="552" y2="38" stroke-width="2.4" />
+          <text class="tm" x="364" y="32" font-size="9.5">head edge</text>
+          <g class="s-score" stroke-width="1.3" stroke-dasharray="9 6">
+            <line x1="386" y1="38" x2="386" y2="276" />
+            <line x1="530" y1="38" x2="530" y2="276" />
+          </g>
+          <!-- flanges: r 2.75mm x6 = 16.5, centres 42 apart -> 9 px clear -->
+          <g class="s-brass" stroke-width="1.4" stroke-dasharray="3 2.5">
+            <circle cx="416" cy="104" r="16.5" /><circle cx="458" cy="104" r="16.5" />
+            <circle cx="500" cy="104" r="16.5" />
+            <circle cx="416" cy="146" r="16.5" /><circle cx="458" cy="146" r="16.5" />
+            <circle cx="500" cy="146" r="16.5" />
+          </g>
+          <g class="s-hole" stroke-width="1.6">
+            <circle cx="416" cy="104" r="7.5" /><circle cx="458" cy="104" r="7.5" />
+            <circle cx="500" cy="104" r="7.5" />
+            <circle cx="416" cy="146" r="7.5" /><circle cx="458" cy="146" r="7.5" />
+            <circle cx="500" cy="146" r="7.5" />
+          </g>
+          <!-- the 1.5 mm gap, called out once -->
+          <path class="s-dim" stroke-width="0.9" d="M 433,104 L 441,104 M 433,99 L 433,109 M 441,99 L 441,109" />
+          <path class="s-dim" stroke-width="0.9" d="M 437,104 L 437,72 L 560,72" />
+          <text class="tb" x="564" y="68" font-size="10">1.5 mm of leather</text>
+          <text class="tb" x="564" y="81" font-size="10">between flanges</text>
+          <g class="s-dim" stroke-width="0.9">
+            <path d="M 416,196 L 458,196 M 416,191 L 416,201 M 458,191 L 458,201" />
+            <path d="M 458,196 L 500,196 M 500,191 L 500,201" />
+            <path d="M 546,104 L 546,146 M 541,104 L 551,104 M 541,146 L 551,146" />
+            <path d="M 370,38 L 370,104 M 365,38 L 375,38 M 365,104 L 375,104" />
+            <path d="M 386,258 L 530,258 M 386,253 L 386,263 M 530,253 L 530,263" />
+          </g>
+          <text class="td" x="437" y="212" font-size="10" text-anchor="middle">7</text>
+          <text class="td" x="479" y="212" font-size="10" text-anchor="middle">7</text>
+          <text class="td" x="556" y="129" font-size="10">7</text>
+          <text class="td" x="360" y="75"  font-size="10" text-anchor="end">11</text>
+          <text class="td" x="458" y="274" font-size="10" text-anchor="middle">24 spine</text>
+          <text class="tb" x="458" y="300" font-size="10" text-anchor="middle">12 holes per cover</text>
+        </svg>
+      </div>
+      <div class="titleblock">
+        <span class="k">Fig. 01</span>
+        <span>Spine cluster &mdash; V1 vs V2</span>
+        <span>Shown 6&times;</span>
+        <span>Dashed ring = set eyelet flange</span>
+      </div>
+    </div>
+    <figcaption>Both drawn at the same 6&times; magnification, top of the spine, outside face up.
+      The dashed rings are the flange each set eyelet leaves on the leather — the thing that
+      actually collides. The holes themselves were never the problem.</figcaption>
+  </figure>
+
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>Detail</th><th>V1</th><th>V2</th><th>Why</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="lab">Elastic holes</td><td class="was">6 &mdash; one row of 3 per end</td>
+            <td class="now">12 &mdash; two rows of 3 per end</td><td>you asked for the double row</td></tr>
+        <tr><td class="lab">Elastic hole dia</td><td class="was">3.0 mm</td><td class="now">2.5 mm</td>
+            <td>to take your 2.5 mm eyelets</td></tr>
+        <tr><td class="lab">Closure hole dia</td><td class="was">4.0 mm</td><td class="now">3.0 mm</td>
+            <td>you asked for a 3 mm eyelet here</td></tr>
+        <tr><td class="lab">Column centres</td><td class="was">6.0 / 5.5 mm</td><td class="now">7.0 mm, all three</td>
+            <td>clears the 5.5 mm flange</td></tr>
+        <tr><td class="lab">Row centres</td><td class="was">&mdash;</td><td class="now">7.0 mm</td>
+            <td>new &mdash; same clearance vertically</td></tr>
+        <tr><td class="lab">Spine width</td><td class="was">22 / 20 mm</td><td class="now">24 mm, all three</td>
+            <td>consequence of the 7 mm columns</td></tr>
+        <tr><td class="lab">Sizes in the lineup</td><td class="was">A5 + passport</td>
+            <td class="now">A5 + Regular + A6</td><td>Regular is new, A6 is now a true A6</td></tr>
+        <tr><td class="lab">Print tiling</td><td class="was">Letter landscape, seams both ways</td>
+            <td class="now">Letter portrait, vertical seams only</td><td>one line of tape per joint</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note brass">
+    <span class="h">Two things I changed on my own judgement</span>
+    <p><strong>The elastic holes are 2.5&nbsp;mm, not the 2&nbsp;mm you asked for.</strong> A
+      2.5&nbsp;mm eyelet barrel will not pass through a 2.0&nbsp;mm hole. If your eyelets turn
+      out to want a snug undersized pilot, that's one number in the build script.</p>
+    <p><strong>All three spines are 24&nbsp;mm.</strong> Three columns of 5.5&nbsp;mm flanges
+      need that width whatever size the book is — the hardware doesn't shrink with the paper.
+      Making them identical means one punch layout, one setting jig, one set of numbers. It does
+      leave the A6 with a spine that's chunky for its size; the only real ways to slim it are
+      smaller eyelets or two elastics instead of three, and section&nbsp;11 has both sets of
+      numbers.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">02</span>
+    <p class="eyebrow">The double row</p>
+    <h2>What the second row is actually for</h2>
+  </div>
+
+  <div class="col stack">
+    <p>With one row, each elastic pulls straight against the edge of a single hole. Over time
+      that edge stretches and the hole goes oval, and the elastic leaves the spine at whatever
+      angle the insert drags it to.</p>
+    <p>With two rows, the elastic exits the <strong>inner</strong> hole, crosses a 7&nbsp;mm bar
+      of leather on the outside, and re-enters through the <strong>outer</strong> hole, where it
+      terminates in a stopper knot on the inside. The load is carried by that bar — spread across
+      two eyelets and the leather between them — rather than by one hole edge. It also means the
+      strand leaves the spine parallel to it, so the inserts hang square.</p>
+  </div>
+
+  <figure>
+    <div class="frame">
+      <div class="plate">
+        <svg viewBox="0 0 700 330" style="min-width:620px" role="img"
+             aria-label="Top of the V2 spine seen from outside. Each elastic runs up the inside
+                         of the spine, emerges through the inner hole, crosses a 7 mm bar of
+                         leather on the outside, re-enters through the outer hole and ends in a
+                         stopper knot on the inside.">
+          <!-- spine band, 24 mm at 6x -->
+          <rect class="s-surf" x="150" y="34" width="144" height="266" />
+          <line class="s-ink" x1="120" y1="34" x2="324" y2="34" stroke-width="2.4" />
+          <text class="tm" x="120" y="26" font-size="10">head edge of the cover</text>
+          <g class="s-score" stroke-width="1.3" stroke-dasharray="9 6">
+            <line x1="150" y1="34" x2="150" y2="300" />
+            <line x1="294" y1="34" x2="294" y2="300" />
+          </g>
+          <text class="ts" x="146" y="316" font-size="9.5" text-anchor="middle">fold</text>
+          <text class="ts" x="298" y="316" font-size="9.5" text-anchor="start">fold</text>
+
+          <!-- the two columns nearer the fold, drawn plain -->
+          <g class="s-hole" stroke-width="1.5">
+            <circle cx="180" cy="100" r="7.5" /><circle cx="180" cy="142" r="7.5" />
+            <circle cx="222" cy="100" r="7.5" /><circle cx="222" cy="142" r="7.5" />
+          </g>
+          <g class="s-brass" stroke-width="3.4" stroke-linecap="round">
+            <path d="M 180,142 L 180,100" />
+            <path d="M 222,142 L 222,100" />
+          </g>
+          <g class="s-brass" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="7 6" opacity="0.5">
+            <path d="M 180,142 L 180,300" />
+            <path d="M 222,142 L 222,300" />
+          </g>
+
+          <!-- outermost column, the annotated one: its leaders reach the
+               labels without crossing the other two columns -->
+          <g class="s-hole" stroke-width="1.8">
+            <circle cx="264" cy="100" r="7.5" /><circle cx="264" cy="142" r="7.5" />
+          </g>
+          <path class="s-brass" stroke-width="3.8" stroke-dasharray="7 6"
+                d="M 264,300 L 264,142" opacity="0.5" />
+          <path class="s-brass" stroke-width="3.8" stroke-linecap="round" d="M 264,142 L 264,100" />
+          <circle class="s-brassf" cx="264" cy="86" r="5.5" opacity="0.5" />
+
+          <!-- leaders -->
+          <g class="s-dim" stroke-width="0.9">
+            <path d="M 274,100 L 400,100" />
+            <path d="M 270,121 L 340,121 L 340,136 L 400,136" />
+            <path d="M 274,142 L 360,142 L 360,172 L 400,172" />
+            <path d="M 272,86  L 340,86 L 340,64 L 400,64" />
+            <path d="M 274,240 L 400,240" />
+            <path d="M 140,34 L 128,34 L 128,100 L 140,100" />
+            <path d="M 128,100 L 116,100" />
+          </g>
+          <text class="td" x="104" y="72" font-size="10" text-anchor="end">11</text>
+
+          <g font-size="11">
+            <text class="tb" x="406" y="60">stopper knot, tied on the INSIDE</text>
+            <text class="tm" x="406" y="74" font-size="10">figure-eight, snug to the hole, trimmed close</text>
+            <text class="t"  x="406" y="104">OUTER ROW &mdash; y 11</text>
+            <text class="tm" x="406" y="117" font-size="10">the elastic ends here</text>
+            <text class="tb" x="406" y="140">7 mm bar, on the outside face</text>
+            <text class="tm" x="406" y="153" font-size="10">this is what carries the load</text>
+            <text class="t"  x="406" y="176">INNER ROW &mdash; y 18</text>
+            <text class="tm" x="406" y="189" font-size="10">the running strand comes out here</text>
+            <text class="tb" x="406" y="244">runs down the inside of the spine</text>
+            <text class="tm" x="406" y="257" font-size="10">to the mirrored pair at the tail, 176 mm away</text>
+          </g>
+
+          <!-- key -->
+          <g transform="translate(406,286)" font-size="10">
+            <path class="s-brass" stroke-width="3.4" stroke-linecap="round" d="M 0,-4 L 22,-4" />
+            <text class="tm" x="30" y="-1">elastic on the outside</text>
+            <path class="s-brass" stroke-width="3.4" stroke-linecap="round"
+                  stroke-dasharray="7 6" opacity="0.5" d="M 0,12 L 22,12" />
+            <text class="tm" x="30" y="15">elastic hidden inside</text>
+          </g>
+          <text class="tm" x="222" y="316" font-size="9.5" text-anchor="middle">shown 6&times;</text>
+        </svg>
+      </div>
+      <div class="titleblock">
+        <span class="k">Fig. 02</span>
+        <span>Elastic anchoring at the double row</span>
+        <span>Outside face up</span>
+        <span>A5 dimensions &mdash; A6 identical bar 7 mm</span>
+      </div>
+    </div>
+    <figcaption>One elastic per column, three columns, three inserts. The tail of the cover is
+      the mirror of this about the cover's horizontal centreline, so each elastic is anchored
+      the same way at both ends.</figcaption>
+  </figure>
+
+  <div class="note">
+    <span class="h">The knot lands under the insert</span>
+    <p>At y&nbsp;=&nbsp;11 the stopper knot sits about 6&nbsp;mm inside the head of the cover,
+      which is under the top edge of the insert stack. That's true of any traveler's cover and
+      it's fine at 2&nbsp;mm elastic — but trim the tails close, and set that outer eyelet with
+      the rolled side facing in so the knot is bearing on smooth brass rather than a cut edge.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">03</span>
+    <p class="eyebrow">The flat pattern</p>
+    <h2>All three, drawn to the same scale</h2>
+  </div>
+
+  <div class="col stack">
+    <p>Outside face up, reading <span class="m">FRONT &middot; SPINE &middot; BACK &middot;
+      FLAP</span>. The flap hangs off the <strong>back</strong> cover's fore-edge so it folds in
+      over the insert stack and the front cover closes on top of it.</p>
+  </div>
+
+  <figure>
+    <div class="frame">
+      <div class="plate">
+        <svg viewBox="-14 0 512 933" style="min-width:680px" role="img"
+             aria-label="Flat cutting patterns for the A5, Regular and A6 covers, all drawn at the
+                         same scale, with panel widths, fold lines, the optional hinge score and
+                         the double-row hole clusters at each end of the spine.">
+
+          <g transform="translate(0,64)">
+            <text class="t"  x="0" y="-52" font-size="12.5">A5 &mdash; 438 &times; 212 mm</text>
+            <text class="tm" x="0" y="-40" font-size="9.5">for 6 &times; 8 in inserts (152.4 &times; 203.2 mm) &mdash; three of them</text>
+            <rect class="s-paper" x="0" y="0" width="438" height="212" rx="6" />
+            <rect class="s-ink" x="0" y="0" width="438" height="212" rx="6" stroke-width="1.5" />
+            <g class="s-score" stroke-width="1.2" stroke-dasharray="8 5">
+              <line x1="157" y1="0" x2="157" y2="212" />
+              <line x1="181" y1="0" x2="181" y2="212" />
+              <line x1="338" y1="0" x2="338" y2="212" />
+            </g>
+            <line class="s-score" x1="354" y1="0" x2="354" y2="212" stroke-width="1" stroke-dasharray="3 4" opacity="0.6" />
+            <g class="s-brass" stroke-width="0.5" opacity="0.75">
+              <circle cx="162" cy="11" r="2.75" />
+              <circle cx="169" cy="11" r="2.75" />
+              <circle cx="176" cy="11" r="2.75" />
+              <circle cx="162" cy="18" r="2.75" />
+              <circle cx="169" cy="18" r="2.75" />
+              <circle cx="176" cy="18" r="2.75" />
+              <circle cx="169" cy="106" r="3" />
+              <circle cx="162" cy="194" r="2.75" />
+              <circle cx="169" cy="194" r="2.75" />
+              <circle cx="176" cy="194" r="2.75" />
+              <circle cx="162" cy="201" r="2.75" />
+              <circle cx="169" cy="201" r="2.75" />
+              <circle cx="176" cy="201" r="2.75" />
+            </g>
+            <g class="s-inkf">
+              <circle cx="162" cy="11" r="1.25" />
+              <circle cx="169" cy="11" r="1.25" />
+              <circle cx="176" cy="11" r="1.25" />
+              <circle cx="162" cy="18" r="1.25" />
+              <circle cx="169" cy="18" r="1.25" />
+              <circle cx="176" cy="18" r="1.25" />
+              <circle cx="169" cy="106" r="1.5" />
+              <circle cx="162" cy="194" r="1.25" />
+              <circle cx="169" cy="194" r="1.25" />
+              <circle cx="176" cy="194" r="1.25" />
+              <circle cx="162" cy="201" r="1.25" />
+              <circle cx="169" cy="201" r="1.25" />
+              <circle cx="176" cy="201" r="1.25" />
+            </g>
+            <text class="t"  x="78.5" y="102" font-size="10" text-anchor="middle">FRONT COVER</text>
+            <text class="tm" x="78.5" y="115" font-size="8" text-anchor="middle">157 &times; 212</text>
+            <text class="t"  x="259.5" y="102" font-size="10" text-anchor="middle">BACK COVER</text>
+            <text class="tm" x="259.5" y="115" font-size="8" text-anchor="middle">157 &times; 212</text>
+            <text class="t"  x="388" y="102" font-size="10" text-anchor="middle">FLAP</text>
+            <text class="tm" x="388" y="115" font-size="8" text-anchor="middle">100 wide</text>
+            <line class="s-dim" x1="169" y1="212" x2="169" y2="228" stroke-width="0.8" />
+            <text class="td" x="169" y="238" font-size="8.5" text-anchor="middle">SPINE 24</text>
+            <line class="s-dim" x1="354" y1="212" x2="354" y2="244" stroke-width="0.7" stroke-dasharray="2 2" />
+            <text class="ts" x="354" y="254" font-size="8.5" text-anchor="middle">hinge 354</text>
+            <g class="s-dim" stroke-width="0.8">
+              <line x1="0" y1="-16" x2="438" y2="-16" />
+              <line x1="0" y1="-20" x2="0" y2="-12" />
+              <line x1="157" y1="-20" x2="157" y2="-12" />
+              <line x1="181" y1="-20" x2="181" y2="-12" />
+              <line x1="338" y1="-20" x2="338" y2="-12" />
+              <line x1="438" y1="-20" x2="438" y2="-12" />
+              <line x1="169" y1="-27" x2="169" y2="-17" stroke-width="0.6" />
+            </g>
+            <g class="td" font-size="8.5" text-anchor="middle">
+              <text x="78.5"  y="-22">157</text>
+              <text x="169" y="-30">24</text>
+              <text x="259.5" y="-22">157</text>
+              <text x="388" y="-22">100</text>
+            </g>
+          </g>
+
+          <g transform="translate(0,390)">
+            <text class="t"  x="0" y="-52" font-size="12.5">Regular &mdash; 325 &times; 216 mm</text>
+            <text class="tm" x="0" y="-40" font-size="9.5">panels 4.5 &times; 8.5 in &mdash; holds three Traveler's Regular inserts (110 &times; 210 mm)</text>
+            <rect class="s-paper" x="0" y="0" width="325" height="216" rx="5" />
+            <rect class="s-ink" x="0" y="0" width="325" height="216" rx="5" stroke-width="1.5" />
+            <g class="s-score" stroke-width="1.2" stroke-dasharray="8 5">
+              <line x1="114.5" y1="0" x2="114.5" y2="216" />
+              <line x1="138.5" y1="0" x2="138.5" y2="216" />
+              <line x1="253" y1="0" x2="253" y2="216" />
+            </g>
+            <line class="s-score" x1="267" y1="0" x2="267" y2="216" stroke-width="1" stroke-dasharray="3 4" opacity="0.6" />
+            <g class="s-brass" stroke-width="0.5" opacity="0.75">
+              <circle cx="119.5" cy="11" r="2.75" />
+              <circle cx="126.5" cy="11" r="2.75" />
+              <circle cx="133.5" cy="11" r="2.75" />
+              <circle cx="119.5" cy="18" r="2.75" />
+              <circle cx="126.5" cy="18" r="2.75" />
+              <circle cx="133.5" cy="18" r="2.75" />
+              <circle cx="126.5" cy="108" r="3" />
+              <circle cx="119.5" cy="198" r="2.75" />
+              <circle cx="126.5" cy="198" r="2.75" />
+              <circle cx="133.5" cy="198" r="2.75" />
+              <circle cx="119.5" cy="205" r="2.75" />
+              <circle cx="126.5" cy="205" r="2.75" />
+              <circle cx="133.5" cy="205" r="2.75" />
+            </g>
+            <g class="s-inkf">
+              <circle cx="119.5" cy="11" r="1.25" />
+              <circle cx="126.5" cy="11" r="1.25" />
+              <circle cx="133.5" cy="11" r="1.25" />
+              <circle cx="119.5" cy="18" r="1.25" />
+              <circle cx="126.5" cy="18" r="1.25" />
+              <circle cx="133.5" cy="18" r="1.25" />
+              <circle cx="126.5" cy="108" r="1.5" />
+              <circle cx="119.5" cy="198" r="1.25" />
+              <circle cx="126.5" cy="198" r="1.25" />
+              <circle cx="133.5" cy="198" r="1.25" />
+              <circle cx="119.5" cy="205" r="1.25" />
+              <circle cx="126.5" cy="205" r="1.25" />
+              <circle cx="133.5" cy="205" r="1.25" />
+            </g>
+            <text class="t"  x="57.25" y="104" font-size="10" text-anchor="middle">FRONT COVER</text>
+            <text class="tm" x="57.25" y="117" font-size="8" text-anchor="middle">114.5 &times; 216</text>
+            <text class="t"  x="195.75" y="104" font-size="10" text-anchor="middle">BACK COVER</text>
+            <text class="tm" x="195.75" y="117" font-size="8" text-anchor="middle">114.5 &times; 216</text>
+            <text class="t"  x="289" y="104" font-size="10" text-anchor="middle">FLAP</text>
+            <text class="tm" x="289" y="117" font-size="8" text-anchor="middle">72 wide</text>
+            <line class="s-dim" x1="126.5" y1="216" x2="126.5" y2="232" stroke-width="0.8" />
+            <text class="td" x="126.5" y="242" font-size="8.5" text-anchor="middle">SPINE 24</text>
+            <line class="s-dim" x1="267" y1="216" x2="267" y2="248" stroke-width="0.7" stroke-dasharray="2 2" />
+            <text class="ts" x="267" y="258" font-size="8.5" text-anchor="middle">hinge 267</text>
+            <g class="s-dim" stroke-width="0.8">
+              <line x1="0" y1="-16" x2="325" y2="-16" />
+              <line x1="0" y1="-20" x2="0" y2="-12" />
+              <line x1="114.5" y1="-20" x2="114.5" y2="-12" />
+              <line x1="138.5" y1="-20" x2="138.5" y2="-12" />
+              <line x1="253" y1="-20" x2="253" y2="-12" />
+              <line x1="325" y1="-20" x2="325" y2="-12" />
+              <line x1="126.5" y1="-27" x2="126.5" y2="-17" stroke-width="0.6" />
+            </g>
+            <g class="td" font-size="8.5" text-anchor="middle">
+              <text x="57.25"  y="-22">114.5</text>
+              <text x="126.5" y="-30">24</text>
+              <text x="195.75" y="-22">114.5</text>
+              <text x="289" y="-22">72</text>
+            </g>
+          </g>
+
+          <g transform="translate(0,716)">
+            <text class="t"  x="0" y="-52" font-size="12.5">A6 &mdash; 312 &times; 157 mm</text>
+            <text class="tm" x="0" y="-40" font-size="9.5">for true A6 inserts (105 &times; 148 mm) &mdash; three of them</text>
+            <rect class="s-paper" x="0" y="0" width="312" height="157" rx="5" />
+            <rect class="s-ink" x="0" y="0" width="312" height="157" rx="5" stroke-width="1.5" />
+            <g class="s-score" stroke-width="1.2" stroke-dasharray="8 5">
+              <line x1="110" y1="0" x2="110" y2="157" />
+              <line x1="134" y1="0" x2="134" y2="157" />
+              <line x1="244" y1="0" x2="244" y2="157" />
+            </g>
+            <line class="s-score" x1="257" y1="0" x2="257" y2="157" stroke-width="1" stroke-dasharray="3 4" opacity="0.6" />
+            <g class="s-brass" stroke-width="0.5" opacity="0.75">
+              <circle cx="115" cy="10" r="2.75" />
+              <circle cx="122" cy="10" r="2.75" />
+              <circle cx="129" cy="10" r="2.75" />
+              <circle cx="115" cy="17" r="2.75" />
+              <circle cx="122" cy="17" r="2.75" />
+              <circle cx="129" cy="17" r="2.75" />
+              <circle cx="122" cy="78.5" r="3" />
+              <circle cx="115" cy="140" r="2.75" />
+              <circle cx="122" cy="140" r="2.75" />
+              <circle cx="129" cy="140" r="2.75" />
+              <circle cx="115" cy="147" r="2.75" />
+              <circle cx="122" cy="147" r="2.75" />
+              <circle cx="129" cy="147" r="2.75" />
+            </g>
+            <g class="s-inkf">
+              <circle cx="115" cy="10" r="1.25" />
+              <circle cx="122" cy="10" r="1.25" />
+              <circle cx="129" cy="10" r="1.25" />
+              <circle cx="115" cy="17" r="1.25" />
+              <circle cx="122" cy="17" r="1.25" />
+              <circle cx="129" cy="17" r="1.25" />
+              <circle cx="122" cy="78.5" r="1.5" />
+              <circle cx="115" cy="140" r="1.25" />
+              <circle cx="122" cy="140" r="1.25" />
+              <circle cx="129" cy="140" r="1.25" />
+              <circle cx="115" cy="147" r="1.25" />
+              <circle cx="122" cy="147" r="1.25" />
+              <circle cx="129" cy="147" r="1.25" />
+            </g>
+            <text class="t"  x="55" y="74.5" font-size="10" text-anchor="middle">FRONT COVER</text>
+            <text class="tm" x="55" y="87.5" font-size="8" text-anchor="middle">110 &times; 157</text>
+            <text class="t"  x="189" y="74.5" font-size="10" text-anchor="middle">BACK COVER</text>
+            <text class="tm" x="189" y="87.5" font-size="8" text-anchor="middle">110 &times; 157</text>
+            <text class="t"  x="278" y="74.5" font-size="10" text-anchor="middle">FLAP</text>
+            <text class="tm" x="278" y="87.5" font-size="8" text-anchor="middle">68 wide</text>
+            <line class="s-dim" x1="122" y1="157" x2="122" y2="173" stroke-width="0.8" />
+            <text class="td" x="122" y="183" font-size="8.5" text-anchor="middle">SPINE 24</text>
+            <line class="s-dim" x1="257" y1="157" x2="257" y2="189" stroke-width="0.7" stroke-dasharray="2 2" />
+            <text class="ts" x="257" y="199" font-size="8.5" text-anchor="middle">hinge 257</text>
+            <g class="s-dim" stroke-width="0.8">
+              <line x1="0" y1="-16" x2="312" y2="-16" />
+              <line x1="0" y1="-20" x2="0" y2="-12" />
+              <line x1="110" y1="-20" x2="110" y2="-12" />
+              <line x1="134" y1="-20" x2="134" y2="-12" />
+              <line x1="244" y1="-20" x2="244" y2="-12" />
+              <line x1="312" y1="-20" x2="312" y2="-12" />
+              <line x1="122" y1="-27" x2="122" y2="-17" stroke-width="0.6" />
+            </g>
+            <g class="td" font-size="8.5" text-anchor="middle">
+              <text x="55"  y="-22">110</text>
+              <text x="122" y="-30">24</text>
+              <text x="189" y="-22">110</text>
+              <text x="278" y="-22">68</text>
+            </g>
+          </g>
+
+          <!-- key -->
+          <g transform="translate(334,752)" font-size="9">
+            <text class="tm" x="0" y="-10" font-size="8.5" letter-spacing="1.4">KEY</text>
+            <line class="s-score" x1="0" y1="4" x2="18" y2="4" stroke-width="1.2" stroke-dasharray="8 5" />
+            <text class="tm" x="25" y="7">fold / score</text>
+            <line class="s-score" x1="0" y1="22" x2="18" y2="22" stroke-width="1" stroke-dasharray="3 4" opacity="0.6" />
+            <text class="tm" x="25" y="25">optional hinge score</text>
+            <circle class="s-inkf" cx="9" cy="40" r="1.25" />
+            <text class="tm" x="25" y="43">hole, true size</text>
+            <circle class="s-brass" cx="9" cy="58" r="2.75" stroke-width="0.5" />
+            <text class="tm" x="25" y="61">eyelet flange, true size</text>
+          </g>
+        </svg>
+      </div>
+      <div class="titleblock">
+        <span class="k">Fig. 03</span>
+        <span>Flat cutting patterns</span>
+        <span>1 px = 1 mm &mdash; all three at the same scale</span>
+        <span>Outside face up</span>
+      </div>
+    </div>
+    <figcaption>Holes and flanges are drawn at true size relative to the piece, which is why each
+      cluster reads as one small block rather than six separate dots. The spine is the same
+      24&nbsp;mm on all three &mdash; it holds the same hardware regardless of how big the book
+      is, which is most obvious on the A6.</figcaption>
+  </figure>
+
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>Dimension</th><th class="num">A5</th><th class="num">Regular</th><th class="num">A6</th><th>Note</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="lab">Insert it fits</td><td class="num">152.4 &times; 203.2</td><td class="num">110 &times; 210</td><td class="num">105 &times; 148</td><td>three of them</td></tr>
+        <tr><td class="lab">Cover panel</td><td class="num">157 &times; 212</td><td class="num">114.5 &times; 216</td><td class="num">110 &times; 157</td><td>overhang varies, see below</td></tr>
+        <tr><td class="lab">Fore-edge overhang</td><td class="num">4.6</td><td class="num">4.5</td><td class="num">5</td><td>beyond the insert</td></tr>
+        <tr><td class="lab">Head / tail overhang</td><td class="num">4.4</td><td class="num">3</td><td class="num">4.5</td><td>each end</td></tr>
+        <tr><td class="lab">Spine width</td><td class="num">24</td><td class="num">24</td><td class="num">24</td><td>set by the eyelet flange</td></tr>
+        <tr><td class="lab">Flap width</td><td class="num">100</td><td class="num">72</td><td class="num">68</td><td>measured from the fold</td></tr>
+        <tr><td class="lab">Flat piece</td><td class="num">438 &times; 212</td><td class="num">325 &times; 216</td><td class="num">312 &times; 157</td><td>the cut outline</td></tr>
+        <tr><td class="lab">Leather needed</td><td class="num">450 &times; 224</td><td class="num">337 &times; 228</td><td class="num">324 &times; 169</td><td>minimum, with handling margin</td></tr>
+        <tr><td class="lab">Corner radius</td><td class="num">6</td><td class="num">5</td><td class="num">5</td><td>all four outer corners</td></tr>
+        <tr><td class="lab">Fold lines at x =</td><td class="num">157 / 181 / 338</td><td class="num">114.5 / 138.5 / 253</td><td class="num">110 / 134 / 244</td><td>from the left edge</td></tr>
+        <tr><td class="lab">Optional hinge score</td><td class="num">354</td><td class="num">267</td><td class="num">257</td><td>helps the flap climb the stack</td></tr>
+      </tbody>
+      <caption>All values in millimetres, measured from the top-left corner of the flat piece,
+        outside face up.</caption>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">04</span>
+    <p class="eyebrow">Hole schedule</p>
+    <h2>Thirteen holes, two diameters</h2>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>Hole</th><th class="num">A5 x</th><th class="num">A5 y</th>
+            <th class="num">Reg x</th><th class="num">Reg y</th>
+            <th class="num">A6 x</th><th class="num">A6 y</th><th class="num">Dia</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="lab">Head, outer row &mdash; 1</td><td class="num">162</td><td class="num">11</td><td class="num">119.5</td><td class="num">11</td><td class="num">115</td><td class="num">10</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Head, outer row &mdash; 2</td><td class="num">169</td><td class="num">11</td><td class="num">126.5</td><td class="num">11</td><td class="num">122</td><td class="num">10</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Head, outer row &mdash; 3</td><td class="num">176</td><td class="num">11</td><td class="num">133.5</td><td class="num">11</td><td class="num">129</td><td class="num">10</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Head, inner row &mdash; 1</td><td class="num">162</td><td class="num">18</td><td class="num">119.5</td><td class="num">18</td><td class="num">115</td><td class="num">17</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Head, inner row &mdash; 2</td><td class="num">169</td><td class="num">18</td><td class="num">126.5</td><td class="num">18</td><td class="num">122</td><td class="num">17</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Head, inner row &mdash; 3</td><td class="num">176</td><td class="num">18</td><td class="num">133.5</td><td class="num">18</td><td class="num">129</td><td class="num">17</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Closure</td><td class="num">169</td><td class="num">106</td><td class="num">126.5</td><td class="num">108</td><td class="num">122</td><td class="num">78.5</td><td class="num">3</td></tr>
+        <tr><td class="lab">Tail, inner row &mdash; 1</td><td class="num">162</td><td class="num">194</td><td class="num">119.5</td><td class="num">198</td><td class="num">115</td><td class="num">140</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Tail, inner row &mdash; 2</td><td class="num">169</td><td class="num">194</td><td class="num">126.5</td><td class="num">198</td><td class="num">122</td><td class="num">140</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Tail, inner row &mdash; 3</td><td class="num">176</td><td class="num">194</td><td class="num">133.5</td><td class="num">198</td><td class="num">129</td><td class="num">140</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Tail, outer row &mdash; 1</td><td class="num">162</td><td class="num">201</td><td class="num">119.5</td><td class="num">205</td><td class="num">115</td><td class="num">147</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Tail, outer row &mdash; 2</td><td class="num">169</td><td class="num">201</td><td class="num">126.5</td><td class="num">205</td><td class="num">122</td><td class="num">147</td><td class="num">2.5</td></tr>
+        <tr><td class="lab">Tail, outer row &mdash; 3</td><td class="num">176</td><td class="num">201</td><td class="num">133.5</td><td class="num">205</td><td class="num">129</td><td class="num">147</td><td class="num">2.5</td></tr>
+      </tbody>
+      <caption>Millimetres from the top-left corner of the flat piece, outside face up. Per cover
+        you need 12 &times; 2.5&nbsp;mm eyelets and 1 &times; 3&nbsp;mm.</caption>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="h">Measure a set eyelet before you cut the real piece</span>
+    <p>Every spacing number above assumes a set 2.5&nbsp;mm eyelet flanges out to
+      <strong>5.5&nbsp;mm</strong>. Some run to 6&nbsp;mm, and a few of the cheaper brass ones
+      splay wider than that when you set them. Page&nbsp;2 of each PDF has a true-size 5.5&nbsp;mm
+      ring to drop one of yours onto. If it overhangs, raise <span class="m">FLANGE_D</span> in
+      the script and re-run before cutting leather — the columns, rows and spine all move
+      together.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">05</span>
+    <p class="eyebrow">How it folds</p>
+    <h2>The flap belongs to the back cover</h2>
+  </div>
+
+  <figure>
+    <div class="frame">
+      <div class="plate">
+        <svg viewBox="0 0 500 224" style="min-width:600px" role="img"
+             aria-label="Cross-section of the closed cover viewed from the head of the book:
+                         spine at the left, back cover below, three inserts stacked, the flap
+                         folding in over them, the front cover closing on top, and the closure
+                         elastic wrapping the whole book.">
+          <!-- closure elastic, drawn first so the covers sit over it -->
+          <path class="s-brass" stroke-width="2" fill="none" stroke-dasharray="7 5"
+                d="M 30,106 C 30,66 42,60 68,60 L 338,60 C 364,60 374,74 374,106
+                   C 374,138 364,152 338,152 L 68,152 C 42,152 30,146 30,106 Z" />
+
+          <!-- cover: back panel, spine, front panel -->
+          <g class="s-ink" stroke-width="3.2" stroke-linecap="round" fill="none">
+            <path d="M 58,144 L 338,144" />
+            <path d="M 58,144 C 34,144 34,70 58,70" />
+            <path d="M 58,70 L 348,70" />
+          </g>
+
+          <!-- the three inserts -->
+          <g class="s-surf">
+            <rect x="68" y="126" width="258" height="11" rx="2" />
+            <rect x="68" y="112" width="258" height="11" rx="2" />
+            <rect x="68" y="98"  width="258" height="11" rx="2" />
+          </g>
+          <g class="s-ink" stroke-width="0.9" fill="none">
+            <rect x="68" y="126" width="258" height="11" rx="2" />
+            <rect x="68" y="112" width="258" height="11" rx="2" />
+            <rect x="68" y="98"  width="258" height="11" rx="2" />
+          </g>
+
+          <!-- flap: off the back cover fore-edge, up and back over the stack -->
+          <path class="s-score" stroke-width="3.2" stroke-linecap="round" fill="none"
+                d="M 338,144 C 362,144 366,86 342,86 L 204,86" />
+
+          <!-- leaders -->
+          <g class="s-dim" stroke-width="0.8">
+            <path d="M 32,106 L 20,106 L 20,182" />
+            <path d="M 198,132 L 198,182" />
+            <path d="M 276,88 L 276,44 L 286,44" />
+            <path d="M 128,70 L 128,44 L 138,44" />
+            <path d="M 374,106 L 398,106" />
+          </g>
+
+          <g font-size="9.5">
+            <text class="tm" x="16"  y="196">SPINE</text>
+            <text class="tm" x="16"  y="208" font-size="9">3 elastics + closure anchored here</text>
+            <text class="tm" x="174" y="196">3 INSERTS</text>
+            <text class="tm" x="142" y="47">front cover closes on top</text>
+            <text class="ts" x="290" y="47">flap folds IN over the stack</text>
+            <text class="tb" x="402" y="103">closure elastic</text>
+            <text class="tb" x="402" y="115">wraps the closed book</text>
+          </g>
+          <text class="tm" x="16" y="18" font-size="9">CLOSED &mdash; VIEWED FROM THE HEAD OF THE BOOK</text>
+        </svg>
+      </div>
+      <div class="titleblock">
+        <span class="k">Fig. 04</span>
+        <span>Closed cover, cross-section</span>
+        <span>Schematic &mdash; not to scale</span>
+        <span>A5 shown</span>
+      </div>
+    </div>
+    <figcaption>The flap has to climb the stack, so it loses roughly one stack-thickness of
+      reach. A 100&nbsp;mm A5 flap covers about 85&nbsp;mm of the page once it lies flat;
+      the 72&nbsp;mm A6 flap covers about 60&nbsp;mm.</figcaption>
+  </figure>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">06</span>
+    <p class="eyebrow">Files</p>
+    <h2>What to open for which job</h2>
+  </div>
+
+  <div class="files">
+    <div>
+      <span class="fn">a5-cover-v2-mirrored.svg</span>
+      <span class="fd"><strong>Start here for the Maker.</strong> Cricut's guidance for genuine
+        leather is face down on the mat, which mirrors the cut &mdash; so the mirrored file is the
+        one you want. 438 &times; 212 mm.</span>
+    </div>
+    <div>
+      <span class="fn">regular-cover-v2-mirrored.svg</span>
+      <span class="fd">The 4.5 &times; 8.5 in cover, mirrored. 325 &times; 216 mm.</span>
+    </div>
+    <div>
+      <span class="fn">a6-cover-v2-mirrored.svg</span>
+      <span class="fd">True A6, mirrored. 312 &times; 157 mm.</span>
+    </div>
+    <div>
+      <span class="fn">&hellip;-cover-v2.svg</span>
+      <span class="fd">The same three patterns un-mirrored, for cutting grain side up or for
+        opening in another program.</span>
+    </div>
+    <div>
+      <span class="fn">a5-cover-v2-letter.pdf</span>
+      <span class="fd">5 pages &mdash; instructions, scale check, then 3 full-size tiles.</span>
+    </div>
+    <div>
+      <span class="fn">regular-cover-v2-letter.pdf</span>
+      <span class="fd">4 pages &mdash; instructions, scale check, then 2 tiles.</span>
+    </div>
+    <div>
+      <span class="fn">a6-cover-v2-letter.pdf</span>
+      <span class="fd">4 pages &mdash; instructions, scale check, then 2 tiles.</span>
+    </div>
+    <div>
+      <span class="fn">a6-cover-v2-legal.pdf</span>
+      <span class="fd"><strong>The A6 with no tiling at all.</strong> 3 pages of US Legal &mdash;
+        instructions, scale check, and the whole template on one sheet turned 90&deg;. This is the
+        one size in the lineup that fits.</span>
+    </div>
+    <div>
+      <span class="fn">build_templates_v2.py</span>
+      <span class="fd">Generates all ten. Every dimension is in the three
+        <span class="m">Cover(...)</span> blocks at the top; edit and re-run to rebuild everything
+        at once.</span>
+    </div>
+  </div>
+
+  <div class="col stack">
+    <h3>Every SVG has two layers</h3>
+    <p><span class="m">CUT</span> holds the outline and the thirteen holes.
+      <span class="m">FOLD</span> holds four vertical score lines. Set <span class="m">FOLD</span>
+      to <strong>Pen&nbsp;/&nbsp;Draw</strong>, or delete it. Left as Cut it will slice your cover
+      into four strips.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">07</span>
+    <p class="eyebrow">Printing</p>
+    <h2>Three pages, one line of tape per joint</h2>
+  </div>
+
+  <div class="col stack">
+    <p>The A5 and Regular pieces don't fit any single US sheet &mdash; at 212&nbsp;mm and
+      216&nbsp;mm tall they're taller than the short side of Letter or Legal once you allow for
+      printer margins. But both clear a <em>portrait</em> Letter page's height, which is the
+      useful trick: tile across the width only, so every seam runs vertically, there's one
+      straight tape line per joint, and nothing has to be aligned in two directions at once.</p>
+    <p>The A6 is the exception. At 312 &times; 157&nbsp;mm it fits a single US Legal sheet turned
+      90&deg;, with about 29&nbsp;mm of margin along the long edges and 13&nbsp;mm at the foot.
+      That's what <span class="m">a6-cover-v2-legal.pdf</span> is &mdash; no seams, no tape, no
+      registration to get wrong. If you're cutting the A6 by hand, print that one and skip the
+      tiling entirely.</p>
+  </div>
+
+  <figure>
+    <div class="frame">
+      <div class="plate">
+        <svg viewBox="0 0 480 200" style="min-width:520px" role="img"
+             aria-label="Tiling map for the A5 template: the 438 mm piece is split across three
+                         portrait Letter pages with 20 mm overlap bands at each of the two
+                         vertical seams.">
+          <!-- the assembled piece -->
+          <rect class="s-paper" x="40" y="86" width="350" height="72" rx="4" />
+          <rect class="s-ink" x="40" y="86" width="350" height="72" rx="4" stroke-width="1.4" />
+          <!-- splits at 146 and 292 mm of 438, scaled 0.799 -->
+          <g class="s-score" stroke-width="1.1" stroke-dasharray="6 4">
+            <line x1="156.7" y1="78" x2="156.7" y2="166" />
+            <line x1="273.3" y1="78" x2="273.3" y2="166" />
+          </g>
+          <!-- overlap bands -->
+          <g class="s-brasst">
+            <rect x="148.7" y="86" width="16" height="72" />
+            <rect x="265.3" y="86" width="16" height="72" />
+          </g>
+          <g class="s-brass" stroke-width="0.8" opacity="0.8">
+            <rect x="148.7" y="86" width="16" height="72" fill="none" />
+            <rect x="265.3" y="86" width="16" height="72" fill="none" />
+          </g>
+          <!-- registration marks -->
+          <g class="s-dim" stroke-width="1">
+            <path d="M 149.7,104 L 163.7,104 M 156.7,97 L 156.7,111" />
+            <circle cx="156.7" cy="104" r="5" fill="none" />
+            <path d="M 149.7,140 L 163.7,140 M 156.7,133 L 156.7,147" />
+            <circle cx="156.7" cy="140" r="5" fill="none" />
+            <path d="M 266.3,104 L 280.3,104 M 273.3,97 L 273.3,111" />
+            <circle cx="273.3" cy="104" r="5" fill="none" />
+            <path d="M 266.3,140 L 280.3,140 M 273.3,133 L 273.3,147" />
+            <circle cx="273.3" cy="140" r="5" fill="none" />
+          </g>
+
+          <!-- tile brackets above -->
+          <g class="s-dim" stroke-width="1">
+            <path d="M 36,64 L 164.7,64 M 36,60 L 36,68 M 164.7,60 L 164.7,68" />
+            <path d="M 148.7,50 L 281.3,50 M 148.7,46 L 148.7,54 M 281.3,46 L 281.3,54" />
+            <path d="M 265.3,64 L 394,64 M 265.3,60 L 265.3,68 M 394,60 L 394,68" />
+          </g>
+          <g class="td" font-size="10" text-anchor="middle">
+            <text x="100" y="60">TILE 1</text>
+            <text x="215" y="46">TILE 2</text>
+            <text x="330" y="60">TILE 3</text>
+          </g>
+
+          <!-- labels below -->
+          <path class="s-dim" stroke-width="0.8" d="M 156.7,166 L 156.7,180 L 200,180" />
+          <text class="tb" x="205" y="183" font-size="10">20 mm overlap &mdash; trim, align the</text>
+          <text class="tb" x="205" y="195" font-size="10">+ marks, tape</text>
+          <path class="s-dim" stroke-width="0.8" d="M 40,86 L 40,30 M 390,86 L 390,30 M 40,30 L 390,30" />
+          <text class="td" x="215" y="24" font-size="10" text-anchor="middle">438 mm assembled</text>
+        </svg>
+      </div>
+      <div class="titleblock">
+        <span class="k">Fig. 05</span>
+        <span>Tile map &mdash; A5</span>
+        <span>3 &times; US Letter portrait</span>
+        <span>Regular and A6 use 2 tiles</span>
+      </div>
+    </div>
+    <figcaption>Each seam carries two registration crosses, one near the head and one near the
+      tail. Get both onto their partners and the joint is square — a single cross lets the page
+      pivot.</figcaption>
+  </figure>
+
+  <ol class="steps">
+    <li><div class="stack-s">
+      <h3>Print at 100%, then prove it</h3>
+      <p>Turn off "fit to page" and "scale to paper size". Page&nbsp;2 of each PDF has a
+        100&nbsp;mm bar and a 6&nbsp;inch bar — measure one before you cut anything. If they're
+        short, reprint; don't compensate by cutting bigger.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Trim, overlay, tape</h3>
+      <p>Trim each tile along its <span class="m">TRIM / TAPE LINE</span>, lay it over the next
+        so the crosses coincide, and tape the overlap. Work left to right, then check the
+        assembled length against the flat-piece dimension printed across the head of the
+        template.</p>
+    </div></li>
+  </ol>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">08</span>
+    <p class="eyebrow">On the Maker</p>
+    <h2>Cut the outline on the machine, punch the holes by hand</h2>
+  </div>
+
+  <div class="note">
+    <span class="h">These are starting settings, not tested numbers</span>
+    <p>I can't test-cut from here, and I don't know your hide. Run the pattern on an offcut — or
+      just a corner and a few holes — before you commit a full-size piece of hide.</p>
+  </div>
+
+  <div class="col stack">
+    <p>One honest warning about the holes: 2.5&nbsp;mm circles are near the bottom of what a
+      rotary or deep-point blade cuts cleanly in leather. The blade has to pivot inside a
+      1.25&nbsp;mm radius, and what usually comes out is a slightly torn hole or a plug that
+      won't release. A hand punch gives a rounder hole that seats an eyelet better.</p>
+    <p>So my recommendation is to let the Maker cut the outline and the corner radii — the part
+      that's genuinely tedious by hand — and either delete the holes from the CUT layer, or leave
+      them and treat whatever it produces as a pilot to open up with a 2.5&nbsp;mm punch. Try both
+      on a scrap.</p>
+  </div>
+
+  <ol class="steps">
+    <li><div class="stack-s">
+      <h3>Check the size on import</h3>
+      <p>Confirm Design Space reports the right size before anything else — SVG import scaling
+        is the most common way a template silently comes out wrong. It should read
+        <span class="m">438 &times; 212 mm</span> (17.24 &times; 8.35 in) for the A5,
+        <span class="m">325 &times; 216 mm</span> (12.80 &times; 8.50 in) for the Regular, or
+        <span class="m">312 &times; 157 mm</span> (12.28 &times; 6.18 in) for the A6. If it's off,
+        set the width explicitly.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Deal with the FOLD layer first</h3>
+      <p>Set it to Pen/Draw or delete it, before you do anything else. This is the mistake that
+        costs you a whole piece of leather.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Mat and material</h3>
+      <p>StrongGrip (purple) 12 &times; 24 mat, with the piece rotated 90&deg; — all three
+        patterns clear the 11.5 &times; 23.5 in cutting area that way, and none of them fits a
+        12 &times; 12. Leather grain side down, brayered flat, all four edges taped so nothing
+        creeps mid-cut.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Blade and passes</h3>
+      <p>Deep Point blade for 2&ndash;3&nbsp;oz genuine leather. Closest genuine-leather preset,
+        Fast Mode off, expect two passes. Check the cut <em>before</em> unloading the mat —
+        <em>Cut again</em> is only available while the mat is still in.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Release it carefully</h3>
+      <p>Peel the mat away from the leather, not the leather off the mat, or the piece curls.
+        Clear any hole plugs with an awl.</p>
+    </div></li>
+  </ol>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">09</span>
+    <p class="eyebrow">By hand</p>
+    <h2>Punching and setting</h2>
+  </div>
+
+  <ol class="steps">
+    <li><div class="stack-s">
+      <h3>Mark through the paper</h3>
+      <p>Lay the assembled template outside face up on the grain side. Mark the corners and the
+        four fold lines with a scratch awl and prick all thirteen hole centres through the paper.
+        Each hole on the template has a centre cross so you can land the point precisely.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Cut the outline</h3>
+      <p>Straight edges against a steel rule with a fresh blade — one confident pass, not several
+        timid ones. For the corners, a radius punch (6&nbsp;mm for the A5, 5&nbsp;mm for the A6)
+        beats freehand every time.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Punch all thirteen while the piece is flat</h3>
+      <p>2.5&nbsp;mm for the twelve elastic holes, 3&nbsp;mm for the closure. Punch into end grain
+        or a poly board. Do this <em>before</em> creasing — a folded panel won't sit flat under a
+        punch, and the spine is exactly where all the holes are.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Set the eyelets from the outside</h3>
+      <p>Flange on the outside of the spine, rolled side inside where the inserts run. Work from
+        the middle of each cluster outward and check the spine stays flat as you go — twelve
+        eyelets in a 24&nbsp;mm band will bow the leather if you over-set them. Under-set is
+        recoverable; over-set splits the barrel.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Crease the folds</h3>
+      <p>Dampen the grain slightly, run a bone folder along a straight edge on each of the three
+        solid fold lines, and fold away from the grain side. At 2&ndash;3&nbsp;oz you don't need
+        to skive or groove.</p>
+    </div></li>
+  </ol>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">10</span>
+    <p class="eyebrow">Assembly</p>
+    <h2>Closure first, then the elastics</h2>
+  </div>
+
+  <div class="col stack">
+    <p>The order matters. The middle elastic runs straight down the inside of the spine over the
+      closure hole, so if you fit the elastics first you'll be fighting them to seat the closure
+      knot.</p>
+  </div>
+
+  <ol class="steps">
+    <li><div class="stack-s">
+      <h3>Closure elastic</h3>
+      <p>Fold the closure length in half and push the folded end through the 3&nbsp;mm spine
+        eyelet from the <em>inside</em> out. Pass both tails through the loop that emerges and
+        pull it snug — a lark's head sitting flat against the outside of the spine. Knot the
+        tails into a loop sized to wrap the closed book under light tension, then trim.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Middle elastic &mdash; head end first</h3>
+      <p>From the inside, push one end out through the <strong>inner</strong> hole of the head
+        cluster's middle column, across the 7&nbsp;mm bar, and back in through the
+        <strong>outer</strong> hole. Tie a figure-eight stopper on the inside, snug against the
+        outer eyelet, and trim the tail short.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Same elastic &mdash; tail end</h3>
+      <p>Run the working end down the inside of the spine, over the closure knot, and repeat at
+        the tail cluster: out the inner hole, across the bar, in the outer hole, figure-eight on
+        the inside. Set the tension before you knot — the strand should be just taut with the
+        cover flat, not stretched.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Outer two elastics</h3>
+      <p>Same method, same tension, one column at a time. Light tension only — an elastic should
+        hold an insert without pulling the spine into an hourglass.</p>
+    </div></li>
+    <li><div class="stack-s">
+      <h3>Load the inserts and check the flap</h3>
+      <p>Slide each insert's centrefold under its strand. Close the book, fold the flap in over
+        the stack, then close the front cover on top. If the flap fights the stack, add the
+        optional hinge score and re-crease.</p>
+    </div></li>
+  </ol>
+
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>Elastic</th><th class="num">A5</th><th class="num">Regular</th><th class="num">A6</th><th>Note</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="lab">Insert elastics (&times;3)</td><td class="num">300 mm each</td><td class="num">300 mm each</td><td class="num">240 mm each</td><td>generous; trim after both knots</td></tr>
+        <tr><td class="lab">Closure</td><td class="num">400 mm</td><td class="num">320 mm</td><td class="num">300 mm</td><td>size the loop to the loaded book</td></tr>
+        <tr><td class="lab">Total per cover</td><td class="num">~1.3 m</td><td class="num">~1.2 m</td><td class="num">~1.0 m</td><td>2 mm round elastic</td></tr>
+      </tbody>
+      <caption>2 mm elastic through a 2.5 mm eyelet is a working fit — snug enough not to
+        rattle, loose enough to thread without a needle.</caption>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <div class="sheet-head">
+    <span class="no">11</span>
+    <p class="eyebrow">Tuning</p>
+    <h2>If your hardware or leather differs</h2>
+  </div>
+
+  <div class="col stack">
+    <h3>Your eyelet flange is wider than 5.5 mm</h3>
+    <p>This is the one that matters, and it cascades. The chain is
+      <span class="m">col_gap = flange + 1.5</span>, then
+      <span class="m">spine_w = 2 &times; col_gap + flange + 2 &times; 2.25</span>. A 6&nbsp;mm
+      flange gives 7.5&nbsp;mm columns and a 25.5&nbsp;mm spine; a 6.5&nbsp;mm flange gives
+      8&nbsp;mm and 27&nbsp;mm. Set <span class="m">FLANGE_D</span>,
+      <span class="m">COL_GAP</span>, <span class="m">ROW_GAP</span> and
+      <span class="m">SPINE_W</span> together and re-run — the script checks all three clearances
+      and tells you if any of them fails.</p>
+
+    <h3>Going narrower &mdash; especially on the A6</h3>
+    <p>The floor for the column spacing is the flange plus about 1&nbsp;mm. Below that the bridges
+      between eyelets start tearing out as you set them, and once one goes there's no repairing
+      it. On a 24&nbsp;mm spine carrying 5.5&nbsp;mm flanges there is essentially nothing left to
+      give &mdash; tightening to 6.5&nbsp;mm centres buys you 23&nbsp;mm, which isn't worth the
+      risk.</p>
+    <p>If the A6 spine really is too chunky for the book, there are only two honest levers.
+      <strong>Smaller eyelets:</strong> 2&nbsp;mm hardware flanges to about 4.5&nbsp;mm, giving
+      6&nbsp;mm columns and a 21&nbsp;mm spine. <strong>Two elastics instead of three:</strong>
+      two columns give <span class="m">7 + 5.5 + 4.5 = 17 mm</span>, a properly slim spine &mdash;
+      at the cost of one insert. Say which and I'll rebuild it.</p>
+
+    <h3>Thicker leather</h3>
+    <p>Past about 1.5&nbsp;mm, add roughly 1&nbsp;mm of spine per extra 0.5&nbsp;mm of thickness,
+      and start relieving the fold lines — a creasing groove on the grain side or a shallow skive
+      on the flesh side. The optional hinge score stops being optional. Also check your eyelets'
+      grip range: a barrel sized for 1&nbsp;mm won't set properly through 2&nbsp;mm.</p>
+
+    <h3>Different inserts</h3>
+    <p>Panels run roughly <span class="m">insert + 4.5 mm</span> on the fore-edge and
+      <span class="m">insert + 3 to 4.5 mm</span> at head and tail &mdash; the Regular is tighter
+      than the others because its panel size was copied from a cover you already like rather than
+      derived from its inserts. The spine doesn't move when the paper does; it's set by hardware,
+      unless <span class="m">3 &times; (insert thickness) + 6</span> exceeds 24&nbsp;mm, which at
+      three ordinary inserts it won't.</p>
+
+    <h3>Regenerating everything</h3>
+    <p>The three <span class="m">Cover(...)</span> blocks near the top of
+      <span class="m">build_templates_v2.py</span> hold every number on this page. Change them and
+      re-run; six SVGs and four PDFs rebuild together. It prints the full hole schedule and fails
+      loudly if anything collides &mdash; flange to flange, flange to fold, flange to edge, closure
+      to the inner row, panel to insert, tile width against the printable area, and the rotated fit
+      on a Legal sheet. The drawings and tables on this page are generated from those same blocks,
+      so the guide can't drift out of step with the templates.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Panel widths, hole positions and elastic lengths are computed, not measured off an existing
+    cover. The 5.5&nbsp;mm flange is an assumption about hardware I can't see; the Cricut settings
+    are a sensible starting point rather than tested values.</p>
+  <p>Cut a test piece before you cut the good leather.</p>
+</footer>
+
+</div>
